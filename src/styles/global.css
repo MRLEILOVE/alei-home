@@ -1462,6 +1462,7 @@ html[data-season='winter'] [data-season-copy='winter'] {
   .site-header {
     min-height: 84px;
     gap: 12px;
+    padding-right: 36px;
   }
   .name-seal {
     width: 30px;
@@ -1478,7 +1479,7 @@ html[data-season='winter'] [data-season-copy='winter'] {
     letter-spacing: 0.3px;
   }
   .site-header nav {
-    gap: 15px;
+    gap: 7px;
     font-size: 11px;
   }
   .site-header nav a {
@@ -1773,7 +1774,7 @@ html[data-season='winter'] [data-season-copy='winter'] {
     padding: 0 19px;
   }
   .site-header nav {
-    gap: 11px;
+    gap: 4px;
   }
   .hero h1 {
     font-size: 55px;

@@ -6,6 +6,8 @@
 
 首页支持春、夏、秋、冬四套插画和配色。默认按 Asia/Taipei 时区的月份选择：3–5 月春、6–8 月夏、9–11 月秋、12–2 月冬。首页可手动切换，偏好保存在浏览器本地；“随时节”清除手动选择，恢复自动模式。
 
+右上角的窗帘拉绳可向下拖动后松手，按春、夏、秋、冬循环换季，也支持点击、Enter 和空格键。短距离拖动或取消手势时仅回弹。首次访问显示“拉一下试试看！”，可关闭或在首次换季后收起，已展示状态保存在浏览器本地。拉绳和原季节选择器共享状态，不打断音乐。
+
 首屏脚本提前应用外观，插画、书封、播放器进度条与页面文字同步换色。切换季节不重载页面，也不打断正在播放的音频。禁用本地存储仍可在当前页面切换；关闭 JavaScript 时保留完整内容和秋季外观。四季风景是艺术化表达，不代表深圳实时天气。
 
 四季共用一张 WebP 图集，通过 CSS 显示对应象限，并复用为低透明度的整页背景。正文区域叠加淡纸色，首页插画保留胶带和白纸边的便利贴样式。
@@ -40,6 +42,7 @@ npm run preview
 - 页面结构：`src/pages/index.astro`
 - 样式与响应式布局：`src/styles/global.css`
 - 季节文案：`src/data/seasons.ts`；切换逻辑：`src/scripts/seasons.ts`；首屏外观：`src/layouts/Layout.astro`
+- 右上角换季拉绳：`src/components/SeasonCurtain.astro`，手势与初次访问提示由 `src/scripts/seasons.ts` 管理。
 - 整页背景与季节动效：`src/components/SeasonAtmosphere.astro`、`src/styles/atmosphere.css`；动效偏好：`src/scripts/atmosphere.ts`
 - 职场日记封面入口：`src/components/JournalBook.astro`
 - 曲目：`src/data/music.ts`
