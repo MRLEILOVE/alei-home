@@ -1,19 +1,21 @@
 ---
 import { getImage } from 'astro:assets';
 import daydream from '../assets/a-little-daydream.png';
+import journalCover from '../assets/journal-cover-art-v1.png';
 import Icon from './Icon.astro';
 import { songs, stories, type Track } from '../data/music';
 import { profile } from '../data/site';
 const cover = await getImage({ src: daydream, width: 400, format: 'webp' });
+const bookCover = await getImage({ src: journalCover, width: 320, format: 'webp', quality: 88 });
 const base = import.meta.env.BASE_URL;
 function resolveAsset(value: string) {
   return /^https:\/\//.test(value) ? value : `${base}${value.replace(/^\//, '')}`;
 }
-const prepare = (tracks: Track[]) =>
+const prepare = (tracks: Track[], defaultCover = cover.src) =>
   tracks.map((track) => ({
     ...track,
     url: resolveAsset(track.url),
-    cover: track.cover ? resolveAsset(track.cover) : cover.src,
+    cover: track.cover ? resolveAsset(track.cover) : defaultCover,
     ...(track.lrc ? { lrc: resolveAsset(track.lrc) } : {}),
   }));
 const preparedSongs = prepare(songs);
@@ -23,8 +25,9 @@ const firstSong = preparedSongs[0];
 <section
   id="music"
   class="music-card"
+  data-collection="songs"
   aria-labelledby="music-title"
-  data-tracks={JSON.stringify({ songs: preparedSongs, stories: prepare(stories) })}
+  data-tracks={JSON.stringify({ songs: preparedSongs, stories: prepare(stories, bookCover.src) })}
 >
   <div class="music-eyebrow">
     <span>书桌旁的声音</span>

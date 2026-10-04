@@ -829,11 +829,11 @@ html[data-season='winter'] [data-season-copy='winter'] {
   border-radius: 0;
 }
 .audio-player.aplayer .aplayer-pic {
-  width: 54px;
+  width: 80px;
   height: 80px;
 }
 .audio-player.aplayer .aplayer-info {
-  margin-left: 54px;
+  margin-left: 80px;
   height: 80px;
   padding: 9px 8px 0;
 }
@@ -851,6 +851,20 @@ html[data-season='winter'] [data-season-copy='winter'] {
   margin-left: 0;
   font-size: 8px;
   color: var(--muted);
+}
+.music-card[data-collection='songs'] .aplayer-music {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+.music-card[data-collection='songs'] .aplayer-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-card[data-collection='songs'] .aplayer-author {
+  flex-shrink: 0;
 }
 .audio-player.aplayer .aplayer-controller {
   flex-wrap: wrap;
@@ -1705,11 +1719,7 @@ html[data-season='winter'] [data-season-copy='winter'] {
     justify-content: space-between;
     font-size: 11px;
   }
-  .audio-player.aplayer .aplayer-pic {
-    width: 66px;
-  }
   .audio-player.aplayer .aplayer-info {
-    margin-left: 66px;
     padding-left: 12px;
     padding-right: 12px;
   }

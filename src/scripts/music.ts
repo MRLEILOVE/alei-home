@@ -124,6 +124,7 @@ if (root && container && status && fallback) {
   async function selectCollection(name: 'songs' | 'stories', playImmediately = false) {
     const currentRequest = ++requestId;
     activeCollection = name;
+    root!.dataset.collection = name;
     controlObserver?.disconnect();
     if (player) {
       player.pause();
