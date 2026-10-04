@@ -1,0 +1,126 @@
+---
+import { Image } from 'astro:assets';
+import cover from '../assets/journal-cover-art-v1.png';
+import { profile } from '../data/site';
+---
+
+<a
+  class="journal-cover-link"
+  href={`${profile.library}journal/`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <div class="journal-cover-art">
+    <Image
+      src={cover}
+      alt="绿皮火车里写代码的年轻人，窗外是深圳夜色"
+      widths={[320, 640]}
+      sizes="(max-width: 600px) 44vw, 330px"
+      width={640}
+      format="webp"
+      quality={88}
+      loading="lazy"
+    />
+    <div class="journal-cover-title">
+      <h3>
+        程序员的
+        <br />
+        离谱职场日记
+      </h3>
+      <span class="journal-cover-byline">阿雷 / 著</span>
+    </div>
+  </div>
+  <span class="journal-cover-caption">开始阅读 ↗</span>
+</a>
+
+<style>
+  .journal-cover-link {
+    display: flex;
+    flex-direction: column;
+    max-width: 330px;
+    align-self: start;
+  }
+  .journal-cover-art {
+    display: block;
+    position: relative;
+    background: var(--book);
+    border: 1px solid var(--line);
+    box-shadow:
+      4px 4px 0 var(--paper),
+      5px 5px 0 var(--line),
+      9px 11px 16px #302f2710;
+    transform: rotate(-1.5deg);
+    transition:
+      transform 0.25s,
+      box-shadow 0.25s;
+  }
+  .journal-cover-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .journal-cover-art::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 6px;
+    width: 1px;
+    background: #fff5;
+    box-shadow: -4px 0 4px #0002;
+  }
+  .journal-cover-link:hover .journal-cover-art {
+    transform: rotate(0) translateY(-4px);
+    box-shadow:
+      4px 5px 0 var(--paper),
+      5px 6px 0 var(--line),
+      9px 14px 24px #302f2719;
+  }
+  .journal-cover-caption {
+    display: block;
+    margin-top: 15px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .journal-cover-title {
+    position: absolute;
+    top: 8%;
+    left: 9%;
+    right: 7%;
+    color: #263d35;
+  }
+  .journal-cover-title h3 {
+    font-family: var(--serif);
+    font-size: 25px;
+    line-height: 1.45;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .journal-cover-byline {
+    display: block;
+    margin-top: 9px;
+    font-size: 10px;
+    color: #58635a;
+    letter-spacing: 0.12em;
+  }
+  @media (max-width: 820px) {
+    .journal-cover-link {
+      max-width: 290px;
+    }
+    .journal-cover-title h3 {
+      font-size: 22px;
+    }
+  }
+  @media (max-width: 600px) {
+    .journal-cover-caption {
+      margin-top: 13px;
+      font-size: 10px;
+    }
+    .journal-cover-title h3 {
+      font-size: clamp(14px, 3.8vw, 21px);
+    }
+    .journal-cover-byline {
+      margin-top: 5px;
+      font-size: 8px;
+    }
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+import { getImage } from 'astro:assets';
+import daydream from '../assets/a-little-daydream.png';
+import Icon from './Icon.astro';
+import { songs, stories, type Track } from '../data/music';
+import { profile } from '../data/site';
+const cover = await getImage({ src: daydream, width: 400, format: 'webp' });
+const base = import.meta.env.BASE_URL;
+function resolveAsset(value: string) {
+  return /^https:\/\//.test(value) ? value : `${base}${value.replace(/^\//, '')}`;
+}
+const prepare = (tracks: Track[]) =>
+  tracks.map((track) => ({
+    ...track,
+    url: resolveAsset(track.url),
+    cover: track.cover ? resolveAsset(track.cover) : cover.src,
+    ...(track.lrc ? { lrc: resolveAsset(track.lrc) } : {}),
+  }));
+const preparedSongs = prepare(songs);
+const firstSong = preparedSongs[0];
+---
+
+<section
+  id="music"
+  class="music-card"
+  aria-labelledby="music-title"
+  data-tracks={JSON.stringify({ songs: preparedSongs, stories: prepare(stories) })}
+>
+  <div class="music-eyebrow">
+    <span>书桌旁的声音</span>
+    <Icon name="music" size={18} />
+  </div>
+  <h2 id="music-title">
+    留一只耳朵，
+    <br />
+    听听喜欢的。
+  </h2>
+  <div class="music-tabs" role="tablist" aria-label="选择音频类型">
+    <button
+      id="songs-tab"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="songs-panel"
+      data-audio-tab="songs"
+    >
+      我的歌单
+    </button>
+    <button
+      id="stories-tab"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="stories-panel"
+      data-audio-tab="stories"
+      tabindex="-1"
+    >
+      有声书
+    </button>
+  </div>
+  <div id="songs-panel" role="tabpanel" aria-labelledby="songs-tab">
+    <div class="music-empty">
+      <div class="record-art">
+        <img
+          id="record-cover"
+          src={firstSong?.cover || cover.src}
+          alt={firstSong ? `《${firstSong.name}》唱片封面` : '彩虹热气球唱片封面'}
+          width="150"
+          height="150"
+          loading="lazy"
+        />
+        <span class="record-center"></span>
+      </div>
+      {songs.length > 0 ? (
+        <>
+          <p class="empty-title" id="songs-summary">
+            周杰伦 · {songs.length} 首收藏
+          </p>
+          <p class="empty-description">选一首，陪你待一会儿。</p>
+        </>
+      ) : (
+        <>
+          <p class="empty-title">喜欢的歌，慢慢收藏。</p>
+          <p class="empty-description">歌单准备中</p>
+          <button class="text-button" type="button" id="listen-story">
+            <Icon name="headphones" size={17} /> 先听一段我的故事
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+  <div id="stories-panel" role="tabpanel" aria-labelledby="stories-tab" hidden>
+    <p class="audio-intro">一列绿皮火车，一段关于理想、加班和成长的故事。</p>
+  </div>
+  <div id="audio-player" class="audio-player" hidden aria-label="音频播放器"></div>
+  <p id="audio-status" class="audio-status" role="status" aria-live="polite"></p>
+  <a id="audio-fallback" class="audio-fallback" hidden>
+    直接打开音频
+  </a>
+  <div class="music-footer">
+    <span>也可以边走边听</span>
+    <a href={profile.audiobook} target="_blank" rel="noopener noreferrer">
+      网易云有声书 <Icon name="headphones" size={15} />
+    </a>
+  </div>
+  <noscript>
+    <p class="audio-intro">
+      启用 JavaScript 可使用站内播放器，或
+      <a href={`${base}audio/journal-guide.mp3`}>直接收听导读</a>。
+    </p>
+  </noscript>
+</section>
+<script>
+  import '../scripts/music';
+</script>

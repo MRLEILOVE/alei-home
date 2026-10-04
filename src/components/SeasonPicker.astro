@@ -1,0 +1,53 @@
+---
+import { seasons } from '../data/seasons';
+import Icon from './Icon.astro';
+---
+
+<div class="season-picker" aria-label="网站季节外观" role="group">
+  <span class="season-picker-label">把日子翻到</span>
+  <div class="season-buttons">
+    {seasons.map((season) => (
+      <button
+        type="button"
+        data-season-choice={season.id}
+        aria-pressed="false"
+        aria-label={`切换到${season.name}天`}
+      >
+        <span class={`season-dot ${season.id}`} aria-hidden="true"></span>
+        {season.name}
+      </button>
+    ))}
+  </div>
+  <button
+    type="button"
+    class="season-auto"
+    id="season-auto"
+    aria-pressed="true"
+    aria-label="跟随当前月份自动切换季节"
+  >
+    随时节
+  </button>
+  <span class="sr-only" id="season-status" role="status" aria-live="polite"></span>
+</div>
+<div class="weather-control" id="weather-control" hidden>
+  <button
+    class="weather-toggle"
+    id="weather-toggle"
+    type="button"
+    aria-label="开启环境动效"
+    aria-pressed="false"
+  >
+    <Icon name="leaf" size={13} />
+    环境动效 <span id="weather-state">关</span>
+  </button>
+  <span class="weather-hint">
+    <span data-season-copy="spring">细雨 · 花瓣 · 新草</span>
+    <span data-season-copy="summer">流云 · 微风 · 青草</span>
+    <span data-season-copy="autumn">秋风 · 落叶</span>
+    <span data-season-copy="winter">流云 · 飘雪</span>
+  </span>
+  <span class="sr-only" id="weather-status" role="status" aria-live="polite"></span>
+</div>
+<script>
+  import '../scripts/seasons';
+</script>

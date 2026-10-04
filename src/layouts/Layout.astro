@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+import { profile } from '../data/site';
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-season="autumn" data-season-mode="auto" data-weather="off">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f2e9" />
+    <script is:inline>
+      (() => {
+        const month = Number(
+          new Intl.DateTimeFormat('en', { timeZone: 'Asia/Taipei', month: 'numeric' }).format(
+            new Date(),
+          ),
+        );
+        const seasonal =
+          month >= 3 && month <= 5
+            ? 'spring'
+            : month >= 6 && month <= 8
+              ? 'summer'
+              : month >= 9 && month <= 11
+                ? 'autumn'
+                : 'winter';
+        let saved;
+        try {
+          saved = localStorage.getItem('alei-season');
+        } catch {}
+        const valid = ['spring', 'summer', 'autumn', 'winter'].includes(saved);
+        document.documentElement.dataset.season = valid ? saved : seasonal;
+        document.documentElement.dataset.seasonMode = valid ? 'manual' : 'auto';
+        let weather = 'on';
+        try {
+          weather = localStorage.getItem('alei-weather') || 'on';
+        } catch {}
+        document.documentElement.dataset.weatherPreference = weather;
+        document.documentElement.dataset.weather =
+          weather !== 'off' && !matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'on'
+            : 'off';
+      })();
+    </script>
+    <title>{profile.title} · 写代码，也写生活</title>
+    <meta
+      name="description"
+      content="你好，我是阿雷。Java 后端开发者、IntelliJ 插件开发者，也写故事、记录生活。这里是我的文章、开源项目和音乐角。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="阿雷的小站 · 写代码，也写生活" />
+    <meta property="og:description" content={profile.introduction} />
+    {Astro.site && <link rel="canonical" href={new URL(base, Astro.site)} />}
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      跳到主要内容
+    </a>
+    <slot />
+  </body>
+</html>

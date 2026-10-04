@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import character from '../assets/alei-mascot.png';
+import Icon from './Icon.astro';
+---
+
+<aside class="mascot" id="mascot" data-state="idle" aria-label="小阿雷互动助手" hidden>
+  <div class="mascot-dialog" id="mascot-dialog" hidden>
+    <div class="mascot-dialog-head">
+      <span>小阿雷</span>
+      <button type="button" id="mascot-close-dialog" aria-label="关闭对话">
+        <Icon name="close" size={16} />
+      </button>
+    </div>
+    <p id="mascot-message" role="status" aria-live="polite">
+      嗨，我是小阿雷。欢迎来我的小站坐坐。
+    </p>
+    <div class="mascot-actions">
+      <button type="button" data-mascot-action="chat">
+        聊一句
+      </button>
+      <button type="button" data-mascot-action="read">
+        去读文章
+      </button>
+      <button type="button" data-mascot-action="music">
+        去听一会儿
+      </button>
+    </div>
+  </div>
+  <button class="mascot-hide" id="mascot-hide" type="button" aria-label="收起小阿雷">
+    <Icon name="minus" size={16} />
+  </button>
+  <button
+    class="mascot-character"
+    id="mascot-character"
+    type="button"
+    aria-label="和小阿雷聊一聊"
+    aria-controls="mascot-dialog"
+    aria-expanded="false"
+  >
+    <Image
+      src={character}
+      alt="穿黑衣、背斜挎包、戴小米手环的小阿雷"
+      width={180}
+      format="webp"
+      loading="lazy"
+    />
+    <span class="mascot-music" aria-hidden="true">
+      ♫
+    </span>
+  </button>
+</aside>
+<button class="mascot-wake" id="mascot-wake" type="button" aria-label="唤醒小阿雷" hidden>
+  <span>雷</span>
+  <span>小阿雷</span>
+</button>
+<script>
+  import '../scripts/mascot';
+</script>

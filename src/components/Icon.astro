@@ -1,0 +1,45 @@
+---
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+const { name, size = 20, class: className } = Astro.props;
+const paths: Record<string, string> = {
+  sun: 'M12 3v1m0 16v1M3 12h1m16 0h1M5.6 5.6l.7.7m11.4 11.4.7.7M5.6 18.4l.7-.7M17.7 6.3l.7-.7M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
+  pin: 'M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  book: 'M12 6C8 3 4 3 2 4v15c3-1 6-1 10 2m0-15c4-3 8-3 10-2v15c-3-1-6-1-10 2V6',
+  headphones: 'M3 14v-3a9 9 0 0 1 18 0v3M3 12h3v8H3v-8Zm15 0h3v8h-3v-8Z',
+  code: 'm8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 20',
+  database:
+    'M20 5c0 2-4 3-8 3S4 7 4 5s4-3 8-3 8 1 8 3ZM4 5v14c0 2 4 3 8 3s8-1 8-3V5M4 12c0 2 4 3 8 3s8-1 8-3',
+  branch:
+    'M6 6v12M18 6v3c0 4-12 2-12 6M9 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0m0 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0M21 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  music:
+    'M9 18V5l12-3v14M9 7l12-3M9 18c0 2-2 3-4 3s-3-1-3-2 2-3 4-3 3 1 3 2m12-2c0 2-2 3-4 3s-3-1-3-2 2-3 4-3 3 1 3 2',
+  play: 'm9 5 11 7-11 7V5Z',
+  pause: 'M8 5v14M16 5v14',
+  close: 'm6 6 12 12M6 18 18 6',
+  minus: 'M5 12h14',
+  leaf: 'M20 3C8 2 2 7 4 15s16 6 16-12ZM5 20 16 8',
+  heart:
+    'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z',
+  github:
+    'M9 19c-4 1-4-2-6-2m12 5v-4c0-1-.3-1.6-.7-2 3.4-.4 6.7-1.7 6.7-7a5.4 5.4 0 0 0-1.5-3.8A5 5 0 0 0 19.4 1S18 1 15 2.6a13 13 0 0 0-6 0C6 1 4.6 1 4.6 1a5 5 0 0 0-.1 4.2A5.4 5.4 0 0 0 3 9c0 5.3 3.3 6.6 6.7 7-.4.4-.7 1-.7 2v4',
+};
+---
+
+<svg
+  class={className}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d={paths[name] || paths.sun} />
+</svg>

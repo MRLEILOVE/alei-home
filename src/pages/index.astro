@@ -1,0 +1,243 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import MusicCorner from '../components/MusicCorner.astro';
+import Mascot from '../components/Mascot.astro';
+import SeasonPicker from '../components/SeasonPicker.astro';
+import SeasonAtmosphere from '../components/SeasonAtmosphere.astro';
+import JournalBook from '../components/JournalBook.astro';
+import character from '../assets/alei-mascot.png';
+import seasonsArt from '../assets/four-seasons.png';
+import { profile, platforms, projects } from '../data/site';
+import { seasons } from '../data/seasons';
+---
+
+<Layout>
+  <SeasonAtmosphere />
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="wordmark" href="#main" aria-label="阿雷的小站首页">
+        <span class="name-seal" aria-hidden="true">
+          雷
+        </span>
+        <span>
+          阿雷的小站<small>一个人的互联网自留地</small>
+        </span>
+      </a>
+      <nav aria-label="主导航">
+        <a href="#writing">读点文字</a>
+        <a href="#projects">看看作品</a>
+        <a href="#music">听一会儿</a>
+      </nav>
+      <span class="header-location">深圳 · 中国</span>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="profile-line">
+            <span class="avatar">
+              <Image src={character} alt="阿雷的手绘头像" width={160} format="webp" />
+            </span>
+            <span>
+              你好，我是阿雷。<small>写代码的人，也是写故事的人。</small>
+            </span>
+          </div>
+          <h1 id="hero-title">
+            阿雷的
+            <br />
+            <span>四季小站</span>
+            <i aria-hidden="true">。</i>
+          </h1>
+          <p class="hero-intro">{profile.introduction}</p>
+          <a class="hero-link" href="#writing">
+            从一段文字开始 <span aria-hidden="true">↓</span>
+          </a>
+          <SeasonPicker />
+        </div>
+        <figure class="season-figure">
+          <div
+            class="scene-window"
+            role="img"
+            aria-label="小阿雷望着彩虹热气球，走在随四季变换的山间小路上"
+          >
+            <Image
+              class="season-atlas"
+              src={seasonsArt}
+              alt=""
+              width={1600}
+              format="webp"
+              quality={88}
+              loading="eager"
+              fetchpriority="high"
+            />
+            <div class="season-stamp" aria-hidden="true">
+              {seasons.map((season) => (
+                <span data-season-copy={season.id}>
+                  {season.name}
+                  <small>{season.word}</small>
+                </span>
+              ))}
+            </div>
+          </div>
+          <figcaption>
+            <span class="scene-note">
+              {seasons.map((season) => (
+                <span data-season-copy={season.id}>{season.caption}</span>
+              ))}
+            </span>
+            <span class="scene-number" aria-hidden="true">
+              {seasons.map((season, index) => (
+                <span data-season-copy={season.id}>0{index + 1} / 四季手记</span>
+              ))}
+            </span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="footprints" class="elsewhere" aria-label="阿雷的其他个人主页">
+        <p>
+          也在这些地方<span aria-hidden="true">↗</span>
+        </p>
+        <div class="platform-links">
+          {platforms.map((platform) => (
+            <a href={platform.url} target="_blank" rel="noopener noreferrer">
+              <span>{platform.name}</span>
+              <small>{platform.label}</small>
+              <span class="arrow" aria-hidden="true">
+                ↗
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <div class="journal-layout">
+        <div class="journal-main">
+          <section id="writing" class="writing-section" aria-labelledby="writing-title">
+            <div class="section-heading">
+              <h2 id="writing-title">
+                <small>01 / 文字</small>写下来的日子
+              </h2>
+              <a
+                class="subtle-link"
+                href={profile.library}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                文章集 <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <div class="writing-spread">
+              <JournalBook />
+              <article class="essay-feature">
+                <span class="essay-kicker">生活随笔</span>
+                <h3>
+                  慢一点，
+                  <br />
+                  才是人生
+                  <br />
+                  风景。
+                </h3>
+                <p>
+                  工作之外，还有很多值得写下的事。关于成长，关于普通的日子，也关于那些偶尔冒出来的小念头。
+                </p>
+                <a
+                  class="underlined-link"
+                  href={`${profile.library}essays/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  翻开生活的另一页 <span aria-hidden="true">↗</span>
+                </a>
+              </article>
+            </div>
+            <a
+              class="audiobook-link"
+              href={profile.audiobook}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="sound-bars" aria-hidden="true">
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+              </span>
+              <span>眼睛歇一会儿，让故事读给你听。</span>
+              <span>网易云有声书 ↗</span>
+            </a>
+          </section>
+
+          <section id="projects" class="projects-section" aria-labelledby="projects-title">
+            <div class="section-heading">
+              <h2 id="projects-title">
+                <small>02 / 作品</small>顺手做了这些工具
+              </h2>
+              <a
+                class="subtle-link"
+                href={`${profile.github}?tab=repositories`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                全部项目 <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <div class="project-list">
+              {projects.map((project, index) => (
+                <a class="project-row" href={project.url} target="_blank" rel="noopener noreferrer">
+                  <span class="project-number" aria-hidden="true">
+                    0{index + 1}
+                  </span>
+                  <div class="project-copy">
+                    <h3>{project.name}</h3>
+                    <p>{project.description}</p>
+                    <span class="project-tag">{project.tag}</span>
+                  </div>
+                  <span class="project-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <aside class="margin-column" aria-label="书桌一角">
+          <MusicCorner />
+          <section class="desk-note" aria-labelledby="desk-title">
+            <span class="note-date">此刻，桌上</span>
+            <h2 id="desk-title">还有些事，慢慢做。</h2>
+            <ul>
+              <li>继续打磨 IntelliJ 小工具</li>
+              <li>写故事，也把故事读出来</li>
+              <li>给代码以外的生活留点时间</li>
+            </ul>
+            <span class="note-signature" aria-hidden="true">
+              阿雷
+            </span>
+          </section>
+          <div class="season-margin" aria-hidden="true">
+            {seasons.map((season) => (
+              <p data-season-copy={season.id}>
+                {season.aside}
+                <span>{season.name}日小记</span>
+              </p>
+            ))}
+          </div>
+        </aside>
+      </div>
+      <section class="signature" aria-label="个性签名">
+        <span class="signature-label">写在页末</span>
+        <blockquote>{profile.signature}</blockquote>
+        <span class="signature-author">— 阿雷</span>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span>© {new Date().getFullYear()} 阿雷的小站</span>
+      <span class="footer-season">春生 · 夏长 · 秋收 · 冬藏</span>
+      <a href="#main">回到页首 ↑</a>
+    </footer>
+  </div>
+  <Mascot />
+</Layout>

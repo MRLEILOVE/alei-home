@@ -1,0 +1,154 @@
+---
+import { Image } from 'astro:assets';
+import landscape from '../assets/four-seasons.png';
+import '../styles/atmosphere.css';
+
+// 固定分布避免每次渲染重新随机跳位，动效只使用 CSS transform。
+const drops = Array.from({ length: 28 }, (_, i) => ({
+  x: (i * 37 + 8) % 108,
+  duration: 1.7 + (i % 6) * 0.23,
+  delay: -(i * 0.43),
+  height: 12 + (i % 4) * 5,
+}));
+const petals = Array.from({ length: 12 }, (_, i) => ({
+  x: (i * 29 + 4) % 103,
+  duration: 18 + (i % 5) * 3,
+  delay: -(i * 5.1),
+  drift: 60 + (i % 4) * 30,
+}));
+const leaves = Array.from({ length: 22 }, (_, i) => ({
+  x: ((i * 41 + 3) % 108) - 8,
+  duration: 17 + (i % 6) * 2.6,
+  delay: -(i * 3.7),
+  drift: 80 + (i % 5) * 36,
+  size: 12 + (i % 4) * 3,
+  color: ['#ae653b', '#c3923f', '#98814c', '#b4573c'][i % 4],
+}));
+const flakes = Array.from({ length: 42 }, (_, i) => ({
+  x: ((i * 31 + 7) % 105) - 3,
+  duration: 14 + (i % 7) * 2.4,
+  delay: -(i * 2.3),
+  drift: (i % 2 ? 1 : -1) * (24 + (i % 5) * 17),
+  size: 3 + (i % 5),
+}));
+const blades = Array.from({ length: 13 }, (_, i) => ({
+  x: 14 + i * 19,
+  height: 36 + ((i * 23) % 71),
+  bend: ((i % 5) - 2) * 13,
+  delay: -(i * 0.37),
+}));
+---
+
+<div class="season-backdrop" aria-hidden="true">
+  <div class="backdrop-square">
+    <Image
+      class="backdrop-atlas"
+      src={landscape}
+      alt=""
+      width={1600}
+      format="webp"
+      quality={88}
+      loading="eager"
+    />
+  </div>
+</div>
+
+<div class="weather-effects" aria-hidden="true">
+  <div class="weather-clouds">
+    {[0, 1, 2].map((i) => (
+      <svg
+        class="weather-cloud"
+        viewBox="0 0 260 100"
+        style={`--cloud-top: ${8 + i * 23}%; --cloud-width: ${190 + i * 50}px; --duration: ${100 + i * 29}s; --delay: ${-26 - i * 39}s;`}
+      >
+        <path d="M25 78C6 78 5 51 28 48C24 24 48 12 68 26C81-1 123 5 127 34C153 19 180 32 181 51C210 32 239 50 232 68C258 68 252 87 225 86L33 88C21 88 17 82 25 78Z" />
+      </svg>
+    ))}
+  </div>
+
+  <div class="weather-group weather-spring">
+    {drops.map((drop) => (
+      <span
+        class="weather-rain"
+        style={`--x:${drop.x}%;--duration:${drop.duration}s;--delay:${drop.delay}s;--drop-height:${drop.height}px;`}
+      ></span>
+    ))}
+    {petals.map((petal) => (
+      <span
+        class="weather-fall"
+        style={`--x:${petal.x}%;--duration:${petal.duration}s;--delay:${petal.delay}s;--drift:${petal.drift}px;`}
+      >
+        <i class="weather-petal"></i>
+      </span>
+    ))}
+  </div>
+
+  <div class="weather-group weather-autumn">
+    {leaves.map((leaf) => (
+      <span
+        class="weather-fall"
+        style={`--x:${leaf.x}%;--duration:${leaf.duration}s;--delay:${leaf.delay}s;--drift:${leaf.drift}px;`}
+      >
+        <i
+          class="weather-leaf"
+          style={`--leaf-size:${leaf.size}px;--leaf-color:${leaf.color};--delay:${leaf.delay}s;`}
+        ></i>
+      </span>
+    ))}
+  </div>
+
+  <div class="weather-group weather-winter">
+    {flakes.map((flake, index) => (
+      <span
+        class="weather-fall"
+        style={`--x:${flake.x}%;--duration:${flake.duration}s;--delay:${flake.delay}s;--drift:${flake.drift}px;`}
+      >
+        <i
+          class:list={['weather-snow', { 'snow-crystal': index % 6 === 0 }]}
+          style={`--flake-size:${flake.size}px;`}
+        >
+          {index % 6 === 0 ? '❄' : ''}
+        </i>
+      </span>
+    ))}
+  </div>
+
+  <div class="weather-breeze">
+    {[0, 1, 2].map((i) => (
+      <svg
+        class="weather-wind"
+        viewBox="0 0 300 90"
+        style={`--wind-top:${24 + i * 25}%;--duration:${16 + i * 5}s;--delay:${-i * 7 - 3}s;`}
+      >
+        <path d="M3 35C50 12 76 63 130 37S222 11 286 29M32 55C80 34 100 70 152 52S225 36 260 47M92 72C133 57 163 80 202 65" />
+      </svg>
+    ))}
+  </div>
+
+  <div class="weather-grass grass-left">
+    <svg viewBox="0 0 280 130">
+      {blades.map((blade) => (
+        <path
+          class="grass-blade"
+          style={`--delay:${blade.delay}s;`}
+          d={`M${blade.x} 132 Q${blade.x + blade.bend} ${132 - blade.height * 0.58} ${blade.x + blade.bend * 0.85} ${132 - blade.height} Q${blade.x + blade.bend + 12} ${132 - blade.height * 0.4} ${blade.x + 10} 132Z`}
+        />
+      ))}
+    </svg>
+  </div>
+  <div class="weather-grass grass-right">
+    <svg viewBox="0 0 280 130">
+      {blades.map((blade) => (
+        <path
+          class="grass-blade"
+          style={`--delay:${blade.delay - 1}s;`}
+          d={`M${blade.x} 132 Q${blade.x + blade.bend} ${132 - blade.height * 0.58} ${blade.x + blade.bend * 0.85} ${132 - blade.height} Q${blade.x + blade.bend + 12} ${132 - blade.height * 0.4} ${blade.x + 10} 132Z`}
+        />
+      ))}
+    </svg>
+  </div>
+</div>
+
+<script>
+  import '../scripts/atmosphere';
+</script>
