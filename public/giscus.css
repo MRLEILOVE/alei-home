@@ -1,42 +1,158 @@
 @import url('https://giscus.app/themes/light.css');
 
-/* 纸张配色保持中性，透明底色融入首页的四季主题。 */
+/* 与首页四季纸张共用视觉语言；各季节入口仅覆盖调色板。 */
 main {
-  --color-fg-default: #342f29;
-  --color-fg-muted: #766c60;
-  --color-fg-subtle: #766c60;
+  --gb-paper: #f6f2e9;
+  --gb-ink: #342f29;
+  --gb-muted: #766c60;
+  --gb-accent: #9c4e32;
+  --gb-line: #d9d0c0;
+  --gb-wash: #ece4d5;
+  --color-fg-default: var(--gb-ink);
+  --color-fg-muted: var(--gb-muted);
+  --color-fg-subtle: var(--gb-muted);
   --color-canvas-default: transparent;
-  --color-canvas-overlay: #faf8f2;
-  --color-canvas-inset: #f6f2e9;
-  --color-canvas-subtle: #f4f0e7;
-  --color-border-default: #d9d0c0;
-  --color-border-muted: #e7dfd1;
-  --color-accent-fg: #8a573e;
-  --color-accent-emphasis: #8a573e;
-  --color-accent-muted: #8a573e35;
-  --color-accent-subtle: #f0e8da;
-  --color-btn-bg: #f6f2e9;
-  --color-btn-border: #d9d0c0;
-  --color-btn-hover-bg: #ece4d5;
-  --color-btn-hover-border: #c6bba8;
-  --color-btn-primary-bg: #536352;
-  --color-btn-primary-border: #536352;
-  --color-btn-primary-hover-bg: #435242;
-  --color-btn-primary-hover-border: #435242;
+  --color-canvas-overlay: var(--gb-paper);
+  --color-canvas-inset: var(--gb-paper);
+  --color-canvas-subtle: var(--gb-wash);
+  --color-border-default: var(--gb-line);
+  --color-border-muted: color-mix(in srgb, var(--gb-line) 65%, var(--gb-paper));
+  --color-neutral-muted: var(--gb-wash);
+  --color-accent-fg: var(--gb-accent);
+  --color-accent-emphasis: var(--gb-accent);
+  --color-accent-muted: color-mix(in srgb, var(--gb-accent) 22%, transparent);
+  --color-accent-subtle: var(--gb-wash);
+  --color-btn-text: var(--gb-ink);
+  --color-btn-bg: var(--gb-paper);
+  --color-btn-border: var(--gb-line);
+  --color-btn-hover-bg: var(--gb-wash);
+  --color-btn-hover-border: var(--gb-muted);
+  --color-btn-active-bg: var(--gb-wash);
+  --color-btn-selected-bg: var(--gb-wash);
+  --color-btn-primary-bg: var(--gb-accent);
+  --color-btn-primary-border: var(--gb-accent);
+  --color-btn-primary-hover-bg: color-mix(in srgb, var(--gb-accent) 85%, var(--gb-ink));
+  --color-btn-primary-hover-border: var(--color-btn-primary-hover-bg);
+  --color-btn-primary-selected-bg: var(--color-btn-primary-hover-bg);
+  --color-btn-primary-disabled-bg: color-mix(in srgb, var(--gb-accent) 45%, var(--gb-paper));
+  --color-btn-primary-disabled-border: transparent;
   --color-btn-primary-text: #fffdf7;
+  --color-btn-primary-disabled-text: #fffdf7;
+  --color-primer-shadow-focus: 0 0 0 2px var(--color-accent-muted);
+  color-scheme: light;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'PingFang SC',
+    'Microsoft YaHei',
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
 }
 
+body,
+.gsc-main {
+  background: transparent;
+}
 .gsc-main {
   padding: 0;
+  gap: 20px;
 }
-.gsc-comment-box {
-  border-radius: 5px;
+.gsc-reactions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
+.gsc-reactions > div {
+  flex: 0 1 auto;
+  margin-top: 0;
+}
+.gsc-comments {
+  gap: 20px;
 }
 .gsc-header {
-  padding-bottom: 12px;
+  padding-bottom: 0;
+}
+.gsc-right-header {
+  background: var(--gb-wash);
+}
+.gsc-right-header .BtnGroup-item--selected,
+.gsc-right-header .BtnGroup-item--selected .btn {
+  color: var(--gb-accent);
+  background: var(--gb-paper);
+  border-color: var(--gb-line);
+}
+.gsc-comments-count,
+.gsc-reactions-count {
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+  font-weight: 400;
+}
+.gsc-comment-box {
+  border: 1px solid var(--gb-line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gb-paper) 70%, white);
+}
+.gsc-comment-box-tabs {
+  background: var(--gb-wash);
+  border-radius: 2px 2px 0 0;
+}
+.gsc-comment-box-textarea {
+  line-height: 1.9;
+  border-radius: 2px;
+  background-color: var(--gb-paper);
+  background-image: repeating-linear-gradient(
+    transparent 0 26px,
+    color-mix(in srgb, var(--gb-line) 40%, transparent) 26px 27px
+  );
+  background-position: 0 9px;
+}
+.gsc-comment-box-textarea:focus {
+  border-color: var(--gb-accent);
+  box-shadow: var(--color-primer-shadow-focus);
+}
+.gsc-comment-box-textarea::placeholder {
+  color: var(--gb-muted);
+  opacity: 1;
+}
+.gsc-comment-box-textarea:disabled {
+  opacity: 0.8;
+}
+.gsc-comment-box-bottom {
+  background: transparent;
+}
+.gsc-comment,
+.gsc-comment > .color-bg-primary,
+.gsc-reply-box {
+  border-radius: 3px;
+}
+.gsc-comment-header,
+.gsc-reply-box {
+  background: color-mix(in srgb, var(--gb-wash) 55%, var(--gb-paper));
+}
+.gsc-comment-content {
+  line-height: 1.9;
+}
+.gsc-reactions-button {
+  background-color: var(--gb-paper);
+}
+main .btn {
+  border-radius: 3px;
+  box-shadow: none;
+  font-weight: 500;
+}
+main :is(a, button):focus-visible {
+  outline: 2px solid var(--gb-accent);
+  outline-offset: 2px;
 }
 main .gsc-loading-image {
   opacity: 0.6;
+}
+@media (max-width: 600px) {
+  main {
+    font-size: 13px;
+  }
 }

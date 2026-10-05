@@ -1,7 +1,27 @@
 ---
 import { guestbook } from '../data/community';
+import { seasons } from '../data/seasons';
 const base = import.meta.env.BASE_URL;
-const theme = new URL(`${base}giscus.css`, Astro.site ?? 'https://mrleilove.github.io').href;
+const invitations = {
+  spring: '捎一句春日问候，让新的故事发芽。',
+  summer: '把夏日的见闻，写进晚风里。',
+  autumn: '拾起一片秋意，夹进这一页。',
+  winter: '天冷了，留几句有温度的话。',
+};
+const giscusConfig = {
+  repo: guestbook.repo,
+  repoId: guestbook.repoId,
+  category: guestbook.category,
+  categoryId: guestbook.categoryId,
+  mapping: 'number',
+  term: guestbook.discussionNumber,
+  strict: '1',
+  reactionsEnabled: '1',
+  emitMetadata: '0',
+  inputPosition: 'top',
+  lang: 'zh-CN',
+  loading: 'lazy',
+};
 ---
 
 <section id="guestbook" class="guestbook-section" aria-labelledby="guestbook-title">
@@ -9,40 +29,46 @@ const theme = new URL(`${base}giscus.css`, Astro.site ?? 'https://mrleilove.gith
     <h2 id="guestbook-title">
       <small>06 / 留言板</small>路过，也留一句话
     </h2>
-    <span class="guestbook-postmark" aria-hidden="true">
-      见字如面
-    </span>
-  </div>
-  <div class="guestbook-intro">
-    <p>最近读的书、循环的歌，或只是一句「你好」。都可以留在这里。</p>
-    <p>留言公开显示，使用 GitHub 账号登录后即可发表、回复或送上一个表情。</p>
+    <span class="guestbook-heading-note">四季流转，见字如面。</span>
   </div>
   <div class="guestbook-paper">
-    <div class="giscus" aria-label="访客留言"></div>
-    <script
-      is:inline
-      src="https://giscus.app/client.js"
-      data-repo={guestbook.repo}
-      data-repo-id={guestbook.repoId}
-      data-category={guestbook.category}
-      data-category-id={guestbook.categoryId}
-      data-mapping="number"
-      data-term={guestbook.discussionNumber}
-      data-strict="1"
-      data-reactions-enabled="1"
-      data-emit-metadata="0"
-      data-input-position="top"
-      data-theme={theme}
-      data-lang="zh-CN"
-      data-loading="lazy"
-      crossorigin="anonymous"
-      async
-    ></script>
+    <div class="guestbook-letterhead">
+      <div class="guestbook-intro">
+        <span class="guestbook-addressee">致 / 路过的你</span>
+        <p class="guestbook-invitation">
+          {seasons.map((season) => (
+            <span data-season-copy={season.id}>{invitations[season.id]}</span>
+          ))}
+        </p>
+        <p>最近读的书、循环的歌，或只是一句「你好」。都可以留在这里。</p>
+      </div>
+      <div class="guestbook-postmark" aria-hidden="true">
+        {seasons.map((season) => (
+          <span data-season-copy={season.id}>
+            <small>四季来信</small>
+            <strong>{season.name}</strong>
+            <small>{season.word}</small>
+          </span>
+        ))}
+      </div>
+    </div>
+    <p class="guestbook-login-note">
+      使用 GitHub 登录后，留下问候、回复或送上一个表情。留言将公开显示。
+    </p>
+    <div
+      class="giscus"
+      aria-label="访客留言"
+      data-giscus-config={JSON.stringify(giscusConfig)}
+      data-theme-base={base}
+    ></div>
     <noscript>
       <p>启用 JavaScript 可以在这里留言，也可以通过下方链接前往 GitHub。</p>
     </noscript>
     <div class="guestbook-footer">
-      <span>加载不顺时，可以直接到 GitHub 看看。</span>
+      <span>
+        谢谢你，留下一点来过的痕迹。
+        <span class="guestbook-fallback-note">加载不顺时，可移步 GitHub。</span>
+      </span>
       <a href={guestbook.discussionUrl} target="_blank" rel="noopener noreferrer">
         到 GitHub 留言 <span aria-hidden="true">↗</span>
       </a>
@@ -50,37 +76,93 @@ const theme = new URL(`${base}giscus.css`, Astro.site ?? 'https://mrleilove.gith
   </div>
 </section>
 
+<script>
+  import '../scripts/guestbook';
+</script>
+
 <style>
   .guestbook-section {
     padding: 38px 0 54px;
     border-top: 1px solid var(--line);
   }
-  .guestbook-postmark {
-    font: 17px var(--serif);
-    letter-spacing: 4px;
-    color: var(--accent);
-    border: 1px solid var(--line);
-    padding: 8px 13px;
-    transform: rotate(5deg);
-    white-space: nowrap;
-  }
-  .guestbook-intro {
-    margin: -7px 0 25px;
-    line-height: 1.9;
-  }
-  .guestbook-intro p:first-child {
-    font: 400 17px/1.9 var(--serif);
-  }
-  .guestbook-intro p + p {
-    font-size: 12px;
+  .guestbook-heading-note {
     color: var(--muted);
-    margin-top: 8px;
+    font: 13px var(--serif);
+    letter-spacing: 2px;
   }
   .guestbook-paper {
+    position: relative;
+    isolation: isolate;
     border: 1px solid var(--line);
-    padding: 25px 30px 17px;
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
-    box-shadow: 0 5px 18px #30271905;
+    padding: 33px 36px 20px;
+    background: color-mix(in srgb, var(--paper) 96%, white);
+    box-shadow:
+      3px 4px 0 -1px var(--paper),
+      3px 4px 0 0 var(--line),
+      0 12px 28px #30271906;
+  }
+  .guestbook-paper::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0 auto 0 12px;
+    width: 3px;
+    border-inline: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+    pointer-events: none;
+  }
+  .guestbook-letterhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .guestbook-addressee {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+  .guestbook-invitation {
+    color: var(--ink);
+    font: 400 22px/1.7 var(--serif);
+    text-wrap: pretty;
+  }
+  .guestbook-intro p + p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.9;
+  }
+  .guestbook-postmark {
+    flex: 0 0 auto;
+    width: 84px;
+    padding: 10px 6px;
+    text-align: center;
+    color: var(--accent);
+    border: 1px solid var(--line);
+    outline: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    outline-offset: -5px;
+    background: color-mix(in srgb, var(--wash) 70%, var(--paper));
+    transform: rotate(5deg);
+  }
+  .guestbook-postmark small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+  .guestbook-postmark strong {
+    display: block;
+    margin: 5px 0;
+    font: 400 33px/1.3 var(--serif);
+  }
+  .guestbook-login-note {
+    margin: 18px 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.9;
   }
   .giscus {
     min-height: 175px;
@@ -109,28 +191,48 @@ const theme = new URL(`${base}giscus.css`, Astro.site ?? 'https://mrleilove.gith
   .guestbook-footer a span {
     margin-left: 8px;
   }
+  .guestbook-fallback-note {
+    display: inline-block;
+    margin-left: 12px;
+  }
   @media (max-width: 600px) {
     .guestbook-section {
       padding: 28px 0 38px;
     }
-    .guestbook-postmark {
-      font-size: 13px;
-      letter-spacing: 2px;
-      padding: 7px 9px;
+    .guestbook-heading-note {
+      display: none;
     }
-    .guestbook-intro p:first-child {
-      font-size: 15px;
+    .guestbook-letterhead {
+      align-items: flex-start;
+      gap: 14px;
+      padding-bottom: 20px;
+    }
+    .guestbook-invitation {
+      font-size: 18px;
+    }
+    .guestbook-postmark {
+      width: 60px;
+      padding: 9px 4px;
+    }
+    .guestbook-postmark small {
+      font-size: 8px;
+      letter-spacing: 1px;
+    }
+    .guestbook-postmark strong {
+      font-size: 26px;
     }
     .guestbook-paper {
-      padding: 18px 13px 15px;
+      padding: 23px 16px 16px 21px;
+    }
+    .guestbook-paper::before {
+      left: 7px;
     }
     .guestbook-footer {
       font-size: 10px;
     }
-  }
-  @media (max-width: 370px) {
-    .guestbook-postmark {
-      display: none;
+    .guestbook-fallback-note {
+      display: block;
+      margin: 4px 0 0;
     }
   }
 </style>

@@ -1,0 +1,10 @@
+@import url('./giscus.css');
+
+main {
+  --gb-paper: #f2f4e9;
+  --gb-ink: #303e32;
+  --gb-muted: #657260;
+  --gb-accent: #8a4e63;
+  --gb-line: #ced8c5;
+  --gb-wash: #e5ebdb;
+}
