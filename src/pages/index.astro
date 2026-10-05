@@ -7,6 +7,7 @@ import SeasonPicker from '../components/SeasonPicker.astro';
 import SeasonAtmosphere from '../components/SeasonAtmosphere.astro';
 import SeasonCurtain from '../components/SeasonCurtain.astro';
 import JournalBook from '../components/JournalBook.astro';
+import LeisureCorner from '../components/LeisureCorner.astro';
 import character from '../assets/alei-mascot.png';
 import seasonsArt from '../assets/four-seasons.png';
 import { profile, platforms, projects } from '../data/site';
@@ -30,6 +31,8 @@ import { seasons } from '../data/seasons';
         <a href="#writing">读点文字</a>
         <a href="#projects">看看作品</a>
         <a href="#music">听一会儿</a>
+        <a href="#games">小游戏</a>
+        <a href="#books">书籍推荐</a>
       </nav>
       <span class="header-location">深圳 · 中国</span>
     </header>
@@ -203,6 +206,7 @@ import { seasons } from '../data/seasons';
               ))}
             </div>
           </section>
+          <LeisureCorner />
         </div>
 
         <aside class="margin-column" aria-label="书桌一角">

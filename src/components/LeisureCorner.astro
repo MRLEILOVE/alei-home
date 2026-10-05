@@ -1,0 +1,378 @@
+---
+import { Image } from 'astro:assets';
+import gamePreview from '../assets/pelican-game.png';
+import { games, recommendedBooks } from '../data/leisure';
+---
+
+<section id="games" class="leisure-section" aria-labelledby="games-title">
+  <div class="section-heading">
+    <h2 id="games-title">
+      <small>03 / 小游戏</small>去月亮那边，玩一会儿
+    </h2>
+    <span class="section-aside">给日常按个暂停</span>
+  </div>
+  {games.map((game) => (
+    <article class="game-feature">
+      <a
+        class="game-preview"
+        href={game.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`打开小游戏：${game.name}（新窗口）`}
+      >
+        <Image
+          src={gamePreview}
+          alt="鹈鹕骑着自行车穿过月夜云海的游戏画面"
+          width={800}
+          format="webp"
+          quality={85}
+        />
+        <span class="game-photo-label">阿雷的小游戏 / 001</span>
+      </a>
+      <div class="game-copy">
+        <span class="leisure-kicker">
+          {game.subtitle} · {game.duration}
+        </span>
+        <h3>{game.name}</h3>
+        <p>{game.description}</p>
+        <a class="play-link" href={game.url} target="_blank" rel="noopener noreferrer">
+          开始追月 <span aria-hidden="true">↗</span>
+        </a>
+        <small class="game-controls">{game.controls}</small>
+      </div>
+    </article>
+  ))}
+</section>
+
+<section id="books" class="leisure-section bookshelf" aria-labelledby="books-title">
+  <div class="section-heading">
+    <h2 id="books-title">
+      <small>04 / 书籍推荐</small>书架上，留一盏灯
+    </h2>
+    <span class="section-aside">从一本开始</span>
+  </div>
+  {recommendedBooks.map((book, index) => (
+    <article class="book-recommendation">
+      <a
+        class="reading-cover"
+        href={book.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`查看《${book.title}》官方介绍（新窗口）`}
+      >
+        <span class="book-shelf-number">书架 / {String(index + 1).padStart(3, '0')}</span>
+        <strong>{book.title}</strong>
+        <small>{book.originalTitle}</small>
+        <svg class="book-orbit" viewBox="0 0 150 100" fill="none" aria-hidden="true">
+          <circle cx="75" cy="60" r="24" stroke="currentColor" stroke-width="1" />
+          <ellipse
+            cx="75"
+            cy="60"
+            rx="52"
+            ry="12"
+            stroke="currentColor"
+            stroke-width="1"
+            transform="rotate(-24 75 60)"
+          />
+          <path
+            d="M36 14v10m-5-5h10m71 8v8m-4-4h8M90 8v6m-3-3h6"
+            stroke="currentColor"
+            stroke-linecap="round"
+          />
+          <circle cx="25" cy="48" r="1.5" fill="currentColor" />
+          <circle cx="122" cy="78" r="1" fill="currentColor" />
+        </svg>
+        <span class="cover-footnote">在文字里，遇见另一颗星球</span>
+      </a>
+      <div class="book-note">
+        <span class="leisure-kicker">{book.category}</span>
+        <h3>《{book.title}》</h3>
+        <p class="book-author">{book.author} 著</p>
+        <p class="reading-note">{book.note}</p>
+        <p class="book-description">{book.description}</p>
+        <a class="underlined-link" href={book.url} target="_blank" rel="noopener noreferrer">
+          了解这本书 <span>官方介绍 ↗</span>
+        </a>
+      </div>
+    </article>
+  ))}
+</section>
+
+<style>
+  .leisure-section {
+    margin-top: 52px;
+  }
+  .section-aside {
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  .game-feature {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 26px;
+    align-items: center;
+  }
+  .game-preview {
+    display: block;
+    position: relative;
+    padding: 7px 7px 28px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: 2px 5px 12px #3027190b;
+    transform: rotate(-1deg);
+    transition: transform 0.2s;
+  }
+  .game-preview:hover {
+    transform: rotate(0);
+  }
+  .game-preview img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .game-photo-label {
+    position: absolute;
+    bottom: 6px;
+    left: 12px;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .game-copy,
+  .book-note {
+    min-width: 0;
+  }
+  .leisure-kicker {
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .game-copy h3,
+  .book-note h3 {
+    font: 500 26px/1.5 var(--serif);
+    margin: 8px 0 12px;
+  }
+  .game-copy p,
+  .book-description {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.95;
+  }
+  .play-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 19px;
+    padding: 8px 17px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 12px;
+    border: 1px solid var(--ink);
+    transition: background 0.2s;
+  }
+  .play-link:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .game-controls {
+    display: block;
+    margin-top: 11px;
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .bookshelf {
+    border-top: 1px solid var(--line);
+    padding-top: 36px;
+  }
+  .book-recommendation {
+    display: grid;
+    grid-template-columns: 166px minmax(0, 1fr);
+    gap: 35px;
+    align-items: center;
+  }
+  .reading-cover {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 240px;
+    padding: 22px 14px 17px 20px;
+    border: 1px solid var(--line);
+    border-left: 6px solid color-mix(in srgb, var(--book) 70%, var(--paper));
+    background: var(--wash);
+    color: var(--ink);
+    box-shadow:
+      4px 4px 0 var(--paper),
+      5px 5px 0 var(--line),
+      9px 10px 18px #3027190c;
+    transform: rotate(-3deg);
+    transition: transform 0.2s;
+  }
+  .reading-cover:hover {
+    transform: rotate(0);
+  }
+  .reading-cover::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: 19px;
+    width: 13px;
+    height: 31px;
+    background: var(--accent);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  }
+  .book-shelf-number {
+    align-self: start;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .reading-cover strong {
+    font: 400 30px/1.5 var(--serif);
+    letter-spacing: 5px;
+    margin-top: 19px;
+  }
+  .reading-cover small {
+    font:
+      8px/2 Georgia,
+      serif;
+    letter-spacing: 1px;
+  }
+  .book-orbit {
+    width: 100%;
+    max-width: 140px;
+    margin-top: 12px;
+    color: var(--accent);
+  }
+  .cover-footnote {
+    margin-top: auto;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .book-note h3 {
+    margin-bottom: 2px;
+    font-size: 24px;
+  }
+  .book-author {
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .reading-note {
+    margin: 17px 0 9px;
+    font: 500 17px/1.8 var(--serif);
+  }
+  .book-note .underlined-link {
+    padding-top: 14px;
+  }
+  @media (max-width: 1100px) and (min-width: 821px) {
+    .game-feature {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+    .game-preview img {
+      aspect-ratio: 16 / 9;
+    }
+    .book-recommendation {
+      grid-template-columns: 135px minmax(0, 1fr);
+      gap: 25px;
+    }
+    .reading-cover {
+      min-height: 218px;
+      padding-inline: 10px;
+    }
+    .reading-cover strong {
+      font-size: 25px;
+    }
+    .section-aside {
+      display: none;
+    }
+  }
+  @media (max-width: 600px) {
+    .leisure-section {
+      margin-top: 40px;
+    }
+    .section-aside {
+      display: none;
+    }
+    .game-feature {
+      grid-template-columns: 1fr;
+      gap: 23px;
+    }
+    .game-preview {
+      max-width: 420px;
+    }
+    .game-preview img {
+      aspect-ratio: 16 / 9;
+    }
+    .game-copy h3 {
+      margin-bottom: 8px;
+    }
+    .bookshelf {
+      padding-top: 29px;
+    }
+    .book-recommendation {
+      grid-template-columns: 115px minmax(0, 1fr);
+      gap: 23px;
+      align-items: start;
+    }
+    .reading-cover {
+      min-height: 190px;
+      padding: 17px 9px 13px;
+    }
+    .reading-cover strong {
+      font-size: 23px;
+      letter-spacing: 2px;
+    }
+    .reading-cover small {
+      font-size: 6px;
+    }
+    .reading-cover::before {
+      right: 12px;
+      width: 10px;
+      height: 26px;
+    }
+    .cover-footnote {
+      font-size: 6px;
+      letter-spacing: 0;
+    }
+    .book-note h3 {
+      font-size: 22px;
+    }
+    .reading-note {
+      font-size: 15px;
+      margin-top: 12px;
+    }
+    .book-description {
+      font-size: 12px;
+    }
+    .book-note .underlined-link {
+      flex-wrap: wrap;
+      gap: 5px 13px;
+    }
+  }
+  @media (max-width: 370px) {
+    .book-recommendation {
+      grid-template-columns: 94px minmax(0, 1fr);
+      gap: 20px;
+    }
+    .reading-cover {
+      min-height: 167px;
+    }
+    .reading-cover strong {
+      font-size: 21px;
+      letter-spacing: 0;
+    }
+    .cover-footnote {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .game-preview,
+    .reading-cover,
+    .play-link {
+      transition: none;
+    }
+  }
+</style>

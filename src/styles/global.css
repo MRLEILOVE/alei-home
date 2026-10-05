@@ -1475,8 +1475,9 @@ html[data-season='winter'] [data-season-copy='winter'] {
   }
   .site-header {
     min-height: 84px;
+    flex-wrap: wrap;
     gap: 12px;
-    padding-right: 36px;
+    padding: 19px 36px 15px 0;
   }
   .name-seal {
     width: 30px;
@@ -1493,14 +1494,16 @@ html[data-season='winter'] [data-season-copy='winter'] {
     letter-spacing: 0.3px;
   }
   .site-header nav {
-    gap: 7px;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 6px 18px;
     font-size: 11px;
   }
   .site-header nav a {
-    writing-mode: vertical-rl;
-    letter-spacing: 2px;
-    font-size: 10px;
-    padding: 4px;
+    writing-mode: horizontal-tb;
+    letter-spacing: 0;
+    font-size: 11px;
+    padding: 5px 0;
   }
   .hero {
     grid-template-columns: 1fr;
