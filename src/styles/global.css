@@ -193,6 +193,7 @@ blockquote {
 .site-header nav a {
   padding: 8px 0;
   position: relative;
+  white-space: nowrap;
 }
 .site-header nav a::after {
   content: '';
@@ -1234,6 +1235,12 @@ html[data-season='winter'] [data-season-copy='winter'] {
   .site-shell {
     padding: 0 35px;
   }
+  .header-location {
+    display: none;
+  }
+  .site-header nav {
+    gap: 20px;
+  }
   .hero {
     gap: 42px;
   }
@@ -1306,12 +1313,17 @@ html[data-season='winter'] [data-season-copy='winter'] {
   }
   .site-header {
     min-height: 94px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px 36px 14px 0;
   }
   .header-location {
     display: none;
   }
   .site-header nav {
-    gap: 22px;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 6px 22px;
     font-size: 12px;
   }
   .hero {

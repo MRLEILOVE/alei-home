@@ -1,0 +1,42 @@
+@import url('https://giscus.app/themes/light.css');
+
+/* 纸张配色保持中性，透明底色融入首页的四季主题。 */
+main {
+  --color-fg-default: #342f29;
+  --color-fg-muted: #766c60;
+  --color-fg-subtle: #766c60;
+  --color-canvas-default: transparent;
+  --color-canvas-overlay: #faf8f2;
+  --color-canvas-inset: #f6f2e9;
+  --color-canvas-subtle: #f4f0e7;
+  --color-border-default: #d9d0c0;
+  --color-border-muted: #e7dfd1;
+  --color-accent-fg: #8a573e;
+  --color-accent-emphasis: #8a573e;
+  --color-accent-muted: #8a573e35;
+  --color-accent-subtle: #f0e8da;
+  --color-btn-bg: #f6f2e9;
+  --color-btn-border: #d9d0c0;
+  --color-btn-hover-bg: #ece4d5;
+  --color-btn-hover-border: #c6bba8;
+  --color-btn-primary-bg: #536352;
+  --color-btn-primary-border: #536352;
+  --color-btn-primary-hover-bg: #435242;
+  --color-btn-primary-hover-border: #435242;
+  --color-btn-primary-text: #fffdf7;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.gsc-main {
+  padding: 0;
+}
+.gsc-comment-box {
+  border-radius: 5px;
+}
+.gsc-header {
+  padding-bottom: 12px;
+}
+main .gsc-loading-image {
+  opacity: 0.6;
+}

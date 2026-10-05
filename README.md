@@ -50,6 +50,15 @@ npm run preview
 - 歌曲封面：`public/covers/`，通过曲目配置的 `cover` 字段关联。
 - 人物与原始插画：`src/assets/`，构建时由 Astro 生成 WebP 与响应式尺寸。
 - 看板角色互动：`src/scripts/mascot.ts`
+- 友情链接与留言配置：`src/data/community.ts`
+
+## 留言板与友情链接
+
+留言板使用 giscus，中文界面支持评论、回复和表情回应。数据保存在本仓库的 [GitHub Discussions #1](https://github.com/MRLEILOVE/alei-home/discussions/1)，不保存在静态网站文件或访客浏览器里。访客使用 GitHub 登录；站主可以在该讨论页管理留言。重新发布网站不会清除留言。
+
+`Guestbook.astro` 使用固定 discussion 编号绑定留言板，不受页面标题或路径变化影响。组件按需加载，加载异常或禁用 JavaScript 时仍可通过底部链接直接在 GitHub 留言。`public/giscus.css` 提供纸张风格；`giscus.json` 限定生产站点和本地预览来源，并按最新留言排序。不要在前端配置中添加 GitHub token。
+
+友情链接由站主管理：收到申请并确认后，在 `src/data/community.ts` 的 `friendLinks` 数组添加 `name`、`url`（完整 HTTPS 地址）、`description`。暂未添加时显示空状态，不编造友链。访客可在留言板提交交换申请，页面也提供本站名称、地址与介绍。
 
 ## 加入歌曲
 

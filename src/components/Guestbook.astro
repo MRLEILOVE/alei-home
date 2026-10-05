@@ -1,0 +1,136 @@
+---
+import { guestbook } from '../data/community';
+const base = import.meta.env.BASE_URL;
+const theme = new URL(`${base}giscus.css`, Astro.site ?? 'https://mrleilove.github.io').href;
+---
+
+<section id="guestbook" class="guestbook-section" aria-labelledby="guestbook-title">
+  <div class="section-heading">
+    <h2 id="guestbook-title">
+      <small>06 / 留言板</small>路过，也留一句话
+    </h2>
+    <span class="guestbook-postmark" aria-hidden="true">
+      见字如面
+    </span>
+  </div>
+  <div class="guestbook-intro">
+    <p>最近读的书、循环的歌，或只是一句「你好」。都可以留在这里。</p>
+    <p>留言公开显示，使用 GitHub 账号登录后即可发表、回复或送上一个表情。</p>
+  </div>
+  <div class="guestbook-paper">
+    <div class="giscus" aria-label="访客留言"></div>
+    <script
+      is:inline
+      src="https://giscus.app/client.js"
+      data-repo={guestbook.repo}
+      data-repo-id={guestbook.repoId}
+      data-category={guestbook.category}
+      data-category-id={guestbook.categoryId}
+      data-mapping="number"
+      data-term={guestbook.discussionNumber}
+      data-strict="1"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="top"
+      data-theme={theme}
+      data-lang="zh-CN"
+      data-loading="lazy"
+      crossorigin="anonymous"
+      async
+    ></script>
+    <noscript>
+      <p>启用 JavaScript 可以在这里留言，也可以通过下方链接前往 GitHub。</p>
+    </noscript>
+    <div class="guestbook-footer">
+      <span>加载不顺时，可以直接到 GitHub 看看。</span>
+      <a href={guestbook.discussionUrl} target="_blank" rel="noopener noreferrer">
+        到 GitHub 留言 <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guestbook-section {
+    padding: 38px 0 54px;
+    border-top: 1px solid var(--line);
+  }
+  .guestbook-postmark {
+    font: 17px var(--serif);
+    letter-spacing: 4px;
+    color: var(--accent);
+    border: 1px solid var(--line);
+    padding: 8px 13px;
+    transform: rotate(5deg);
+    white-space: nowrap;
+  }
+  .guestbook-intro {
+    margin: -7px 0 25px;
+    line-height: 1.9;
+  }
+  .guestbook-intro p:first-child {
+    font: 400 17px/1.9 var(--serif);
+  }
+  .guestbook-intro p + p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .guestbook-paper {
+    border: 1px solid var(--line);
+    padding: 25px 30px 17px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow: 0 5px 18px #30271905;
+  }
+  .giscus {
+    min-height: 175px;
+  }
+  .guestbook-paper :global(.giscus-frame) {
+    width: 100%;
+    border: 0;
+    color-scheme: light;
+  }
+  .guestbook-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 17px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .guestbook-footer a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .guestbook-footer a span {
+    margin-left: 8px;
+  }
+  @media (max-width: 600px) {
+    .guestbook-section {
+      padding: 28px 0 38px;
+    }
+    .guestbook-postmark {
+      font-size: 13px;
+      letter-spacing: 2px;
+      padding: 7px 9px;
+    }
+    .guestbook-intro p:first-child {
+      font-size: 15px;
+    }
+    .guestbook-paper {
+      padding: 18px 13px 15px;
+    }
+    .guestbook-footer {
+      font-size: 10px;
+    }
+  }
+  @media (max-width: 370px) {
+    .guestbook-postmark {
+      display: none;
+    }
+  }
+</style>

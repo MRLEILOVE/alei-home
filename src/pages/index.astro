@@ -8,6 +8,8 @@ import SeasonAtmosphere from '../components/SeasonAtmosphere.astro';
 import SeasonCurtain from '../components/SeasonCurtain.astro';
 import JournalBook from '../components/JournalBook.astro';
 import LeisureCorner from '../components/LeisureCorner.astro';
+import FriendLinks from '../components/FriendLinks.astro';
+import Guestbook from '../components/Guestbook.astro';
 import character from '../assets/alei-mascot.png';
 import seasonsArt from '../assets/four-seasons.png';
 import { profile, platforms, projects } from '../data/site';
@@ -33,6 +35,8 @@ import { seasons } from '../data/seasons';
         <a href="#music">听一会儿</a>
         <a href="#games">小游戏</a>
         <a href="#books">书籍推荐</a>
+        <a href="#friends">友情链接</a>
+        <a href="#guestbook">留言板</a>
       </nav>
       <span class="header-location">深圳 · 中国</span>
     </header>
@@ -233,6 +237,8 @@ import { seasons } from '../data/seasons';
           </div>
         </aside>
       </div>
+      <FriendLinks guestbookHref="#guestbook" />
+      <Guestbook />
       <section class="signature" aria-label="个性签名">
         <span class="signature-label">写在页末</span>
         <blockquote>{profile.signature}</blockquote>
