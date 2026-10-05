@@ -6,7 +6,6 @@ const root = process.cwd();
 const dist = path.join(root, 'dist');
 const base = `/${(process.env.BASE_PATH || '').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
 const html = await readFile(path.join(dist, 'index.html'), 'utf8');
-const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
 const decode = (value) =>
   value
     .replace(/&quot;/g, '"')
@@ -14,10 +13,10 @@ const decode = (value) =>
     .replace(/&amp;/g, '&');
 let references = 0;
 
-async function verifyReference(value) {
+async function verifyReference(value, page = 'index.html', ids = new Set()) {
   value = decode(value);
   if (/^(https?:|data:|mailto:|tel:|javascript:)/i.test(value)) return;
-  const url = new URL(value, `https://local.invalid${base}`);
+  const url = new URL(value, `https://local.invalid${base}${page}`);
   if (value.startsWith('#')) {
     if (url.hash) assert(ids.has(decodeURIComponent(url.hash.slice(1))), `锚点不存在：${value}`);
     references++;
@@ -32,10 +31,30 @@ async function verifyReference(value) {
   references++;
 }
 
-for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) await verifyReference(match[1]);
-for (const match of html.matchAll(/\bsrcset="([^"]+)"/g)) {
-  for (const source of match[1].split(',')) await verifyReference(source.trim().split(/\s+/)[0]);
+let pageCount = 0;
+async function verifyPages(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await verifyPages(file);
+    } else if (entry.name.endsWith('.html')) {
+      const document = await readFile(file, 'utf8');
+      const page = path.relative(dist, file).split(path.sep).join('/');
+      const ids = new Set([...document.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
+      for (const match of document.matchAll(/\b(?:src|href|data-book-url)="([^"]+)"/g)) {
+        await verifyReference(match[1], page, ids);
+      }
+      for (const match of document.matchAll(/\bsrcset="([^"]+)"/g)) {
+        for (const source of match[1].split(',')) {
+          await verifyReference(source.trim().split(/\s+/)[0], page, ids);
+        }
+      }
+      assert(!document.includes('�'), `页面包含乱码替换字符：${page}`);
+      pageCount++;
+    }
+  }
 }
+await verifyPages(dist);
 const tracksMatch = html.match(/data-tracks="([^"]+)"/);
 assert(tracksMatch, '播放器配置未写入页面');
 const tracks = JSON.parse(decode(tracksMatch[1]));
@@ -66,5 +85,5 @@ async function verifyEncoding(directory) {
 }
 await verifyEncoding(path.join(root, 'src'));
 console.log(
-  `验证通过：1 个页面，${references} 个本地资源/锚点，${tracks.songs.length} 首歌曲，${tracks.stories.length} 段有声书；UTF-8 正常。部署子路径：${base}`,
+  `验证通过：${pageCount} 个页面，${references} 个本地资源/锚点，${tracks.songs.length} 首歌曲，${tracks.stories.length} 段有声书；UTF-8 正常。部署子路径：${base}`,
 );

@@ -2,6 +2,14 @@
 import '../styles/global.css';
 import { profile } from '../data/site';
 const base = import.meta.env.BASE_URL;
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = `${profile.title} · 写代码，也写生活`,
+  description = '你好，我是阿雷。这里有我的文章、开源项目、音乐角、小游戏和书籍推荐。也欢迎串门、交换友链，在留言板留下一句问候。',
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -43,15 +51,12 @@ const base = import.meta.env.BASE_URL;
             : 'off';
       })();
     </script>
-    <title>{profile.title} · 写代码，也写生活</title>
-    <meta
-      name="description"
-      content="你好，我是阿雷。这里有我的文章、开源项目、音乐角、小游戏和书籍推荐。也欢迎串门、交换友链，在留言板留下一句问候。"
-    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="阿雷的小站 · 写代码，也写生活" />
-    <meta property="og:description" content={profile.introduction} />
-    {Astro.site && <link rel="canonical" href={new URL(base, Astro.site)} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
   </head>
   <body>

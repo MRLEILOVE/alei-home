@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import gamePreview from '../assets/pelican-game.png';
 import { games, recommendedBooks } from '../data/leisure';
+const base = import.meta.env.BASE_URL;
 ---
 
 <section id="games" class="leisure-section" aria-labelledby="games-title">
@@ -54,44 +55,62 @@ import { games, recommendedBooks } from '../data/leisure';
   {recommendedBooks.map((book, index) => (
     <article class="book-recommendation">
       <a
-        class="reading-cover"
-        href={book.url}
+        class:list={['reading-cover', { 'reading-cover-image': book.ebook }]}
+        href={book.ebook ? `${base}books/${book.ebook.slug}/` : book.url}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`查看《${book.title}》官方介绍（新窗口）`}
+        aria-label={`${book.ebook ? '阅读' : '查看'}《${book.title}》${book.ebook ? '' : '官方介绍'}（新窗口）`}
       >
-        <span class="book-shelf-number">书架 / {String(index + 1).padStart(3, '0')}</span>
-        <strong>{book.title}</strong>
-        <small>{book.originalTitle}</small>
-        <svg class="book-orbit" viewBox="0 0 150 100" fill="none" aria-hidden="true">
-          <circle cx="75" cy="60" r="24" stroke="currentColor" stroke-width="1" />
-          <ellipse
-            cx="75"
-            cy="60"
-            rx="52"
-            ry="12"
-            stroke="currentColor"
-            stroke-width="1"
-            transform="rotate(-24 75 60)"
+        {book.ebook ? (
+          <Image
+            src={book.ebook.cover}
+            alt={`《${book.title}》封面`}
+            width={332}
+            format="webp"
+            quality={85}
           />
-          <path
-            d="M36 14v10m-5-5h10m71 8v8m-4-4h8M90 8v6m-3-3h6"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-          <circle cx="25" cy="48" r="1.5" fill="currentColor" />
-          <circle cx="122" cy="78" r="1" fill="currentColor" />
-        </svg>
-        <span class="cover-footnote">在文字里，遇见另一颗星球</span>
+        ) : (
+          <>
+            <span class="book-shelf-number">书架 / {String(index + 1).padStart(3, '0')}</span>
+            <strong>{book.title}</strong>
+            <small>{book.originalTitle}</small>
+            <svg class="book-orbit" viewBox="0 0 150 100" fill="none" aria-hidden="true">
+              <circle cx="75" cy="60" r="24" stroke="currentColor" stroke-width="1" />
+              <ellipse
+                cx="75"
+                cy="60"
+                rx="52"
+                ry="12"
+                stroke="currentColor"
+                stroke-width="1"
+                transform="rotate(-24 75 60)"
+              />
+              <path
+                d="M36 14v10m-5-5h10m71 8v8m-4-4h8M90 8v6m-3-3h6"
+                stroke="currentColor"
+                stroke-linecap="round"
+              />
+              <circle cx="25" cy="48" r="1.5" fill="currentColor" />
+              <circle cx="122" cy="78" r="1" fill="currentColor" />
+            </svg>
+            <span class="cover-footnote">在文字里，遇见另一颗星球</span>
+          </>
+        )}
       </a>
       <div class="book-note">
         <span class="leisure-kicker">{book.category}</span>
         <h3>《{book.title}》</h3>
         <p class="book-author">{book.author} 著</p>
         <p class="reading-note">{book.note}</p>
-        <p class="book-description">{book.description}</p>
-        <a class="underlined-link" href={book.url} target="_blank" rel="noopener noreferrer">
-          了解这本书 <span>官方介绍 ↗</span>
+        {book.description && <p class="book-description">{book.description}</p>}
+        <a
+          class="underlined-link"
+          href={book.ebook ? `${base}books/${book.ebook.slug}/` : book.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {book.ebook ? '开始阅读' : '了解这本书'}{' '}
+          <span>{book.ebook ? '在线阅读 ↗' : '官方介绍 ↗'}</span>
         </a>
       </div>
     </article>
@@ -191,6 +210,23 @@ import { games, recommendedBooks } from '../data/leisure';
     grid-template-columns: 166px minmax(0, 1fr);
     gap: 35px;
     align-items: center;
+  }
+  .book-recommendation + .book-recommendation {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px dashed var(--line);
+  }
+  .reading-cover.reading-cover-image {
+    min-height: 0;
+    padding: 0;
+    border-left-width: 4px;
+  }
+  .reading-cover-image::before {
+    display: none;
+  }
+  .reading-cover-image img {
+    width: 100%;
+    height: auto;
   }
   .reading-cover {
     position: relative;

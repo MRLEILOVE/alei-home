@@ -1,0 +1,235 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { recommendedBooks, type RecommendedBook } from '../../data/leisure';
+
+export function getStaticPaths() {
+  return recommendedBooks.flatMap((book) =>
+    book.ebook ? [{ params: { slug: book.ebook.slug }, props: { book, ebook: book.ebook } }] : [],
+  );
+}
+
+interface Props {
+  book: RecommendedBook;
+  ebook: NonNullable<RecommendedBook['ebook']>;
+}
+const { book, ebook } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title={`《${book.title}》在线阅读 · 阿雷的小站`} description={book.note}>
+  <main
+    id="main"
+    class="reader-shell"
+    data-reader
+    data-book-id={ebook.slug}
+    data-book-url={`${base}${ebook.file}`}
+  >
+    <header class="reader-heading">
+      <a class="back-link" href={`${base}#books`}>
+        ← 返回书架
+      </a>
+      <div class="reader-title">
+        <h1>{book.title}</h1>
+        <p>{book.author} 著</p>
+      </div>
+      <a class="download-link" href={`${base}${ebook.file}`} download>
+        下载 EPUB ↓
+      </a>
+    </header>
+    <div class="reader-toolbar" aria-label="阅读设置">
+      <label class="toc-label" for="reader-toc">
+        目录
+        <select id="reader-toc" disabled>
+          <option value="">选择章节…</option>
+        </select>
+      </label>
+      <label for="reader-size">
+        字号
+        <select id="reader-size" disabled>
+          <option value="16">小</option>
+          <option value="18" selected>
+            标准
+          </option>
+          <option value="22">大</option>
+          <option value="26">特大</option>
+        </select>
+      </label>
+    </div>
+    <p id="reader-status" class="reader-status" role="status" aria-live="polite">
+      正在打开书页…
+    </p>
+    <noscript>
+      <p class="reader-status">在线阅读需要启用 JavaScript，也可以下载 EPUB 后用阅读器打开。</p>
+    </noscript>
+    <div
+      id="reader-viewer"
+      class="reader-viewer"
+      role="region"
+      aria-label={`《${book.title}》正文`}
+      aria-busy="true"
+    ></div>
+    <footer class="reader-footer">
+      <button id="reader-prev" type="button" disabled>
+        ← 上一页
+      </button>
+      <p id="reader-position" role="status" aria-live="polite">
+        慢慢读，不着急
+      </p>
+      <button id="reader-next" type="button" disabled>
+        下一页 →
+      </button>
+    </footer>
+    <p class="reader-hint">支持左右方向键翻页 · 自动记住本机阅读位置</p>
+  </main>
+  <script>
+    import '../../scripts/reader';
+  </script>
+</Layout>
+
+<style>
+  .reader-shell {
+    width: min(100%, 1000px);
+    height: 100vh;
+    height: 100dvh;
+    min-height: 480px;
+    margin: 0 auto;
+    padding: 24px 32px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  .reader-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .back-link,
+  .download-link {
+    flex-shrink: 0;
+    color: var(--accent);
+    font-size: 12px;
+    padding-block: 8px;
+  }
+  .reader-title {
+    text-align: center;
+  }
+  h1 {
+    font: 500 25px/1.5 var(--serif);
+  }
+  .reader-title p {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .reader-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 0;
+    font-size: 12px;
+  }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .toc-label {
+    flex: 1;
+    min-width: 0;
+  }
+  select {
+    min-width: 0;
+    max-width: 100%;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--ink);
+    background: var(--paper);
+    font: inherit;
+  }
+  select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  #reader-toc {
+    width: 100%;
+  }
+  .reader-status {
+    padding: 12px;
+    color: var(--accent);
+    font-size: 13px;
+    text-align: center;
+  }
+  .reader-viewer {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+  .reader-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+  }
+  .reader-footer button {
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--wash);
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+  .reader-footer button:hover:not(:disabled) {
+    background: var(--note);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  #reader-position {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .reader-hint {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+  @media (max-width: 600px) {
+    .reader-shell {
+      padding: 12px 12px 8px;
+    }
+    .reader-heading {
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-bottom: 10px;
+    }
+    .reader-title {
+      order: 3;
+      flex-basis: 100%;
+    }
+    h1 {
+      font-size: 22px;
+    }
+    .reader-toolbar {
+      gap: 12px;
+      padding-block: 10px;
+    }
+    label {
+      gap: 5px;
+    }
+    .reader-footer button {
+      padding: 9px 12px;
+    }
+    #reader-position {
+      font-size: 11px;
+    }
+  }
+</style>

@@ -15,7 +15,13 @@
   },
   "dependencies": {
     "aplayer": "1.10.1",
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "epubjs": "0.3.93"
+  },
+  "overrides": {
+    "epubjs": {
+      "@xmldom/xmldom": "0.8.15"
+    }
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",

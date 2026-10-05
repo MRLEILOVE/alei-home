@@ -1,5 +1,9 @@
 # 视觉素材记录
 
+## 推荐书籍封面
+
+`src/assets/books/` 的四张 JPG 从用户提供的对应 EPUB 中提取，保持原始图像：`psychology-of-money.jpg`（金钱心理学）、`out-of-the-gobi.jpg`（走出戈壁）、`thinking-fast-and-slow.jpg`（思考，快与慢）、`superforecasting.jpg`（超预测）。来源目录为 `C:\Users\LeiGu\Documents\【Br7uce】分享几本适合年轻人提升认知的书籍`。构建时由 Astro 生成 WebP 缩略图，完整 EPUB 原样复制到 `public/books/`。
+
 ## 歌曲唱片封面
 
 `public/covers/` 中九张 JPG 原样复制自用户提供的九张照片，按附件顺序依次对应七里香、以父之名、告白气球、夜曲、断了的弦、晴天、暗号、简单爱、稻香。文件名与音频英文名一致，原始图片保持不变；黑胶封面通过 CSS 圆形窗口显示，切歌时由曲目配置同步替换。
