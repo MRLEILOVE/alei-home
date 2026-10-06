@@ -6,7 +6,20 @@
 
 ## 歌曲唱片封面
 
-`public/covers/` 中九张 JPG 原样复制自用户提供的九张照片，按附件顺序依次对应七里香、以父之名、告白气球、夜曲、断了的弦、晴天、暗号、简单爱、稻香。文件名与音频英文名一致，原始图片保持不变；黑胶封面通过 CSS 圆形窗口显示，切歌时由曲目配置同步替换。
+`public/covers/` 中九张 JPG 于 2026-10-06 替换为歌曲所属原发行专辑的封面。通过 Apple iTunes 台湾区接口核对专辑曲目，下载其 `artworkUrl100` 对应的 `600x600bb.jpg` 版本，保留来源图片的实际宽高比。图片保存在本地，文件名与音频英文名一致；黑胶封面通过 CSS 圆形窗口显示，切歌时由曲目配置同步替换。
+
+| 歌曲 | 专辑及来源 | 本地文件 |
+| --- | --- | --- |
+| 七里香 | [七里香](https://music.apple.com/tw/album/536114662) | `jay-qilixiang.jpg` |
+| 以父之名、晴天 | [叶惠美](https://music.apple.com/tw/album/535824731) | `jay-yifuzhiming.jpg`、`jay-qingtian.jpg` |
+| 告白气球 | [周杰伦的床边故事](https://music.apple.com/tw/album/1118757859) | `jay-gaobaiqiqiu.jpg` |
+| 夜曲 | [十一月的萧邦](https://music.apple.com/tw/album/536009641) | `jay-yequ.jpg` |
+| 断了的弦 | [寻找周杰伦 EP](https://music.apple.com/tw/album/536108118) | `jay-duanledexian.jpg` |
+| 暗号 | [八度空间](https://music.apple.com/tw/album/536161722) | `jay-anhao.jpg` |
+| 简单爱 | [范特西](https://music.apple.com/tw/album/535739206) | `jay-jiandanai.jpg` |
+| 稻香 | [魔杰座](https://music.apple.com/tw/album/1624000713) | `jay-daoxiang.jpg` |
+
+封面版权归原权利人所有，来源记录不代表开放许可。
 
 ## 四季场景
 

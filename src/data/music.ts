@@ -7,7 +7,7 @@ export interface Track {
   lrc?: string;
 }
 
-// 使用用户提供的本地音频与九张照片，分别按提供顺序一一对应。
+// 使用用户提供的本地音频，封面对应各首歌曲所属的原发行专辑。
 export const songs: Track[] = [
   {
     name: '七里香',
