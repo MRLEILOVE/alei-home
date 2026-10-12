@@ -237,5 +237,6 @@ console.log(
   `书房验证通过：${meshes} 个人物部件、${catMeshes} 个狸花猫部件、软垫猫窝与蜷睡闭眼/醒来动作、${layout.edges.length} 条避障连接、36000 帧随机行走、交互暂停与恢复。`,
 );
 await import('./verify-study-labels.mjs');
+await import('./verify-real-time.mjs');
 await import('./verify-cat-behavior.mjs');
 await import('./verify-daily-life.mjs');

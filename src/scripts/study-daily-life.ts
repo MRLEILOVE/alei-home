@@ -22,7 +22,7 @@ type DailyStep = {
   waypoint?: number;
 };
 
-/** 一天约八分钟，日钟跟着实际完成的活动走，等猫让路或对话时不会赶进度。 */
+/** minute 为本地作息时刻；duration 仅供离线行为模拟使用。 */
 export const STUDY_DAILY_SCHEDULE: readonly DailyStep[] = (
   [
     {
@@ -78,13 +78,27 @@ const floorElevation = (point: FloorPoint) => {
 };
 const targetIndex = (step: DailyStep) => step.waypoint ?? HOME_WAYPOINT_INDEX[step.activity];
 
-export function createStudyDailyLife(random: () => number = Math.random) {
+export function createStudyDailyLife(random: () => number = Math.random, now?: () => Date) {
+  let wallTime = now?.();
+  const localMinute = (date: Date) =>
+    date.getHours() * 60 +
+    date.getMinutes() +
+    date.getSeconds() / 60 +
+    date.getMilliseconds() / 60000;
+  function scheduledIndex(date: Date) {
+    const minute = localMinute(date);
+    let result = STUDY_DAILY_SCHEDULE.length - 1;
+    STUDY_DAILY_SCHEDULE.forEach((step, i) => {
+      if (step.minute <= minute) result = i;
+    });
+    return result;
+  }
+  let index = wallTime ? scheduledIndex(wallTime) : 0;
   const walker = createRoomRoaming(random, {
-    startIndex: HOME_WAYPOINT_INDEX.sleep,
+    startIndex: wallTime ? targetIndex(STUDY_DAILY_SCHEDULE[index]) : HOME_WAYPOINT_INDEX.sleep,
     speed: WALK_SPEED,
   });
   let person = { ...walker.snapshot(), elevation: 0 };
-  let index = 0;
   let cycle = 0;
   let phase: StudyDailyPhase = 'walking';
   let phaseElapsed = 0;
@@ -102,7 +116,19 @@ export function createStudyDailyLife(random: () => number = Math.random) {
           : 0)
     );
   });
-  walker.routeTo(targetIndex(STUDY_DAILY_SCHEDULE[0]));
+  walker.routeTo(targetIndex(STUDY_DAILY_SCHEDULE[index]));
+  if (wallTime) {
+    const step = STUDY_DAILY_SCHEDULE[index];
+    const spot = step.waypoint === undefined ? HOME_ACTIVITY_SPOTS[step.activity] : walker.position;
+    Object.assign(walker.position, { x: spot.x, z: spot.z });
+    person = {
+      ...walker.snapshot(),
+      yaw: step.waypoint === undefined ? HOME_ACTIVITY_SPOTS[step.activity].yaw : 0,
+      elevation:
+        step.activity === 'sleep' ? 0.9 : isSeated(step.activity) ? 0.18 : floorElevation(spot),
+    };
+    phase = step.activity === 'sleep' ? 'sleeping' : 'acting';
+  }
 
   function currentPoseActivity(): HomeActivity {
     const activity = STUDY_DAILY_SCHEDULE[index].activity;
@@ -114,11 +140,16 @@ export function createStudyDailyLife(random: () => number = Math.random) {
 
   function snapshot(paused = false) {
     const step = STUDY_DAILY_SCHEDULE[index];
-    const progress = Math.min(1, stepElapsed / stepLengths[index]);
     const nextMinute =
       index + 1 < STUDY_DAILY_SCHEDULE.length ? STUDY_DAILY_SCHEDULE[index + 1].minute : 1840;
+    const progress = wallTime
+      ? Math.min(
+          1,
+          ((localMinute(wallTime) - step.minute + 1440) % 1440) / (nextMinute - step.minute),
+        )
+      : Math.min(1, stepElapsed / stepLengths[index]);
     const absoluteMinute = cycle * 1440 + step.minute + (nextMinute - step.minute) * progress;
-    const minute = absoluteMinute % 1440;
+    const minute = wallTime ? localMinute(wallTime) : absoluteMinute % 1440;
     // 早晚逐渐变暗，睡眠中的夜色仍留有暖灯，不让人物和家具消失。
     const daylight = Math.max(0, Math.sin(((minute - 360) / 720) * Math.PI));
     return {
@@ -127,7 +158,11 @@ export function createStudyDailyLife(random: () => number = Math.random) {
       poseActivity: currentPoseActivity(),
       progress,
       minute,
-      day: Math.floor(absoluteMinute / 1440) + 1,
+      day: wallTime
+        ? Math.floor(
+            Date.UTC(wallTime.getFullYear(), wallTime.getMonth(), wallTime.getDate()) / 86400000,
+          )
+        : Math.floor(absoluteMinute / 1440) + 1,
       phase,
       label:
         phase === 'walking'
@@ -144,7 +179,7 @@ export function createStudyDailyLife(random: () => number = Math.random) {
   }
 
   function advance() {
-    index++;
+    index = wallTime ? scheduledIndex(wallTime) : index + 1;
     if (index === STUDY_DAILY_SCHEDULE.length) {
       index = 0;
       cycle++;
@@ -177,7 +212,7 @@ export function createStudyDailyLife(random: () => number = Math.random) {
         person = { ...pose, elevation: floorElevation(pose) };
         const moved = pointDistance(before, pose);
         waiting = moved < 1e-10;
-        // 等待让路时连日钟也暂停，避免进入下一项活动后仍留在走廊。
+        // 动画按实际行走进度推进；现实日钟独立读取本地时间。
         stepElapsed += moved / WALK_SPEED;
         return;
       }
@@ -204,7 +239,7 @@ export function createStudyDailyLife(random: () => number = Math.random) {
       }
     } else if (phase === 'sleeping') {
       person = { ...HOME_ACTIVITY_SPOTS.sleep, moving: false, elevation: 0.9 };
-      if (phaseElapsed >= step.duration) {
+      if (wallTime ? scheduledIndex(wallTime) !== index : phaseElapsed >= step.duration) {
         phase = 'alighting';
         phaseElapsed = 0;
       }
@@ -256,7 +291,10 @@ export function createStudyDailyLife(random: () => number = Math.random) {
         person.elevation = 0;
         advance();
       }
-    } else if (phase === 'acting' && phaseElapsed >= step.duration) {
+    } else if (
+      phase === 'acting' &&
+      (wallTime ? scheduledIndex(wallTime) !== index : phaseElapsed >= step.duration)
+    ) {
       if (isSeated(step.activity)) {
         phase = 'standing';
         phaseElapsed = 0;
@@ -266,8 +304,9 @@ export function createStudyDailyLife(random: () => number = Math.random) {
 
   return {
     position: walker.position,
-    cycleSeconds: stepLengths.reduce((total, value) => total + value, 0),
+    cycleSeconds: now ? 86400 : stepLengths.reduce((total, value) => total + value, 0),
     update(delta: number, options: StudyDailyOptions = {}) {
+      wallTime = now?.();
       if (options.paused || !Number.isFinite(delta) || delta <= 0) return snapshot(true);
       while (delta > 1e-8) {
         const step = Math.min(delta, 1 / 30);

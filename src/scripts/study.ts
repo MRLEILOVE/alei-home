@@ -268,7 +268,7 @@ async function buildRoom() {
     document.querySelector('#room-hotspots')!.appendChild(element);
     return { element, point: new THREE.Vector3(x, y, z) };
   });
-  const dailyLife = createStudyDailyLife();
+  const dailyLife = createStudyDailyLife(Math.random, () => new Date());
   let lifeState = dailyLife.update(0);
   const mascotRoot = document.querySelector<HTMLElement>('#mascot')!;
   const mascotDialog = document.querySelector<HTMLElement>('#mascot-dialog')!;
@@ -315,12 +315,10 @@ async function buildRoom() {
   let pressedCharacter = false;
   let lastMascotState = '';
   let lifePaused = false;
-  let lifeSpeed = 1;
   let showContentLabels = true;
   let following = false;
   let frameDrivingCamera = false;
   const pauseButton = document.querySelector<HTMLButtonElement>('#life-pause')!;
-  const speedButton = document.querySelector<HTMLButtonElement>('#life-speed')!;
   const labelsButton = document.querySelector<HTMLButtonElement>('#room-labels')!;
   const followButton = document.querySelector<HTMLButtonElement>('#room-follow')!;
   function setFollowing(value: boolean) {
@@ -348,7 +346,8 @@ async function buildRoom() {
   const lightText = document.querySelector<HTMLElement>('#life-light')!;
   const dayProgress = document.querySelector<HTMLElement>('#life-progress')!;
   function updateLifeDisplay() {
-    const minute = ((Math.floor(lifeState.minute) % 1440) + 1440) % 1440;
+    const now = new Date();
+    const minute = now.getHours() * 60 + now.getMinutes();
     const text = `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
     if (clock.textContent !== text) clock.textContent = text;
     clock.dateTime = text;
@@ -358,28 +357,24 @@ async function buildRoom() {
         ? '低下头，摸摸狸花猫。'
         : lifeState.label;
     if (activityText.textContent !== label) activityText.textContent = label;
-    dayText.textContent = `第 ${lifeState.day} 天`;
+    dayText.textContent = `${now.getMonth() + 1}月${now.getDate()}日`;
     lightText.textContent = lifeState.daylight > 0.45 ? '☀' : '☾';
     dayProgress.style.width = `${(minute / 1440) * 100}%`;
     stage.dataset.lifeActivity = lifeState.activity;
     stage.dataset.lifePhase = lifeState.phase;
-    stage.dataset.lifeMinute = lifeState.minute.toFixed(2);
+    stage.dataset.lifeMinute = (minute + now.getSeconds() / 60).toFixed(2);
     stage.dataset.lifeDay = String(lifeState.day);
     stage.dataset.lifePaused = String(lifePaused);
-    stage.dataset.lifeSpeed = String(lifeSpeed);
+    stage.dataset.lifeSpeed = '1';
   }
   pauseButton.addEventListener('click', () => {
     lifePaused = !lifePaused;
-    pauseButton.textContent = lifePaused ? '继续日常' : '暂停日常';
+    pauseButton.textContent = lifePaused ? '继续活动' : '暂停活动';
     pauseButton.setAttribute('aria-pressed', String(lifePaused));
     updateLifeDisplay();
   });
-  speedButton.addEventListener('click', () => {
-    lifeSpeed = lifeSpeed === 4 ? 1 : lifeSpeed * 2;
-    speedButton.textContent = `日常速度 ×${lifeSpeed}`;
-    speedButton.setAttribute('aria-label', `日常播放速度为 ${lifeSpeed} 倍，点击切换`);
-    updateLifeDisplay();
-  });
+  // 时钟不依赖渲染帧率，聊天、阅读、暂停活动或减少动态效果时仍与现实一致。
+  const wallClockTimer = window.setInterval(updateLifeDisplay, 1000);
   function updateLabelControl() {
     labelsButton.textContent = showContentLabels ? '隐藏内容入口' : '显示内容入口';
     labelsButton.setAttribute('aria-pressed', String(showContentLabels));
@@ -524,7 +519,7 @@ async function buildRoom() {
     }
     const delta = Math.min((time - (previous || time)) / 1000, 0.1);
     const chatting = talking();
-    const simulationDelta = lifePaused || manipulating ? 0 : delta * lifeSpeed;
+    const simulationDelta = lifePaused || manipulating ? 0 : delta;
     lifeState = dailyLife.update(simulationDelta, {
       paused:
         chatting ||
@@ -794,6 +789,7 @@ async function buildRoom() {
   window.addEventListener('pagehide', (event) => {
     if (event.persisted) return;
     disposed = true;
+    window.clearInterval(wallClockTimer);
     cancelAnimationFrame(frame);
     observer.disconnect();
     panelObserver.disconnect();

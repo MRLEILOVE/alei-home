@@ -241,6 +241,11 @@
 #room-labels:hover {
   color: var(--accent);
 }
+.room-life-controls > span {
+  align-self: center;
+  font: 11px/1.8 var(--serif);
+  color: var(--muted);
+}
 .room-life small {
   display: block;
   font: 10px/1.8 var(--serif);
