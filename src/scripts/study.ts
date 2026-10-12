@@ -316,7 +316,7 @@ async function buildRoom() {
   let lastMascotState = '';
   let lifePaused = false;
   let lifeSpeed = 1;
-  let showContentLabels = false;
+  let showContentLabels = true;
   let following = false;
   let frameDrivingCamera = false;
   const pauseButton = document.querySelector<HTMLButtonElement>('#life-pause')!;
@@ -475,13 +475,16 @@ async function buildRoom() {
       const y = (-projected.y * 0.5 + 0.5) * height;
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
-      element.hidden =
+      // 遮挡时保留标签尺寸，避免 hidden 使宽度归零后逐帧交替显隐。
+      element.style.visibility =
         projected.z > 1 ||
         (character.visible &&
           Math.abs(x - headX) < element.offsetWidth / 2 + bodyHalfWidth &&
           y > Math.min(headY, feetY) - 7 &&
           y < Math.max(headY, feetY) + 7) ||
-        (Math.abs(x - catX) < catPadding + 15 && Math.abs(y - catY) < catPadding + 7);
+        (Math.abs(x - catX) < catPadding + 15 && Math.abs(y - catY) < catPadding + 7)
+          ? 'hidden'
+          : '';
     }
     const anchor = headWorld
       .clone()

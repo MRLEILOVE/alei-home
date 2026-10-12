@@ -4,7 +4,7 @@ const character = document.querySelector<HTMLButtonElement>('#mascot-character')
 const dialog = document.querySelector<HTMLElement>('#mascot-dialog');
 const message = document.querySelector<HTMLElement>('#mascot-message');
 
-if (mascot && wake && character && dialog && message) {
+if (mascot && character && dialog && message) {
   const inRoom = mascot.dataset.mode === 'room';
   const storageKey = 'alei-mascot-collapsed';
   let audioPlaying = false;
@@ -31,8 +31,9 @@ if (mascot && wake && character && dialog && message) {
     character!.setAttribute('aria-expanded', 'false');
   }
   function setCollapsed(collapsed: boolean, save = true) {
+    if (inRoom || !wake) return;
     mascot!.hidden = collapsed;
-    wake!.hidden = !collapsed;
+    wake.hidden = !collapsed;
     closeDialog();
     if (save) {
       try {
@@ -42,14 +43,18 @@ if (mascot && wake && character && dialog && message) {
       }
     }
   }
-  let collapsed = !inRoom && window.matchMedia('(max-width: 600px)').matches;
-  try {
-    const saved = localStorage.getItem(storageKey);
-    if (saved !== null) collapsed = saved === 'true';
-  } catch {
-    /* 使用当前屏幕宽度作为默认值。 */
+  if (inRoom) {
+    mascot.hidden = false;
+  } else {
+    let collapsed = window.matchMedia('(max-width: 600px)').matches;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved !== null) collapsed = saved === 'true';
+    } catch {
+      /* 使用当前屏幕宽度作为默认值。 */
+    }
+    setCollapsed(collapsed, false);
   }
-  setCollapsed(collapsed, false);
 
   character.addEventListener('click', () => {
     if (!dialog.hidden) {
@@ -61,14 +66,14 @@ if (mascot && wake && character && dialog && message) {
     clearTimeout(greetingTimer);
     greetingTimer = setTimeout(restingState, 750);
   });
-  wake.addEventListener('click', () => {
+  wake?.addEventListener('click', () => {
     setCollapsed(false);
     showDialog('我回来啦。想读一段文字，还是听一会儿故事？');
     character.focus();
   });
   document.querySelector('#mascot-hide')?.addEventListener('click', () => {
     setCollapsed(true);
-    wake.focus();
+    wake?.focus();
   });
   document.querySelector('#mascot-close-dialog')?.addEventListener('click', () => {
     closeDialog();
@@ -84,7 +89,7 @@ if (mascot && wake && character && dialog && message) {
     if (
       event.target instanceof Node &&
       !mascot.contains(event.target) &&
-      !wake.contains(event.target)
+      (!wake || !wake.contains(event.target))
     )
       closeDialog();
   });

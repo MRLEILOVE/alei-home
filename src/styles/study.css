@@ -324,22 +324,6 @@
   color: var(--accent);
   font: 11px/24px var(--serif);
 }
-.room-mascot .mascot-hide {
-  right: -22px;
-  top: 2px;
-  width: 19px;
-  height: 19px;
-  pointer-events: auto;
-  opacity: 0;
-}
-.room-mascot:hover .mascot-hide,
-.room-mascot:focus-within .mascot-hide {
-  opacity: 1;
-}
-.room-mascot .mascot-hide svg {
-  width: 12px;
-  height: 12px;
-}
 .room-mascot .mascot-dialog {
   left: 50%;
   right: auto;
@@ -347,12 +331,6 @@
   width: min(275px, calc(100vw - 32px));
   transform: translateX(calc(-50% + var(--mascot-bubble-shift, 0px)));
   background: color-mix(in srgb, var(--paper) 96%, transparent);
-  pointer-events: auto;
-}
-#room-hotspots .room-mascot-wake {
-  position: absolute;
-  right: 8%;
-  bottom: 18px;
   pointer-events: auto;
 }
 .room-mascot .mascot-music {

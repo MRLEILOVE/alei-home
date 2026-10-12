@@ -14,7 +14,7 @@ const { mode = 'floating' } = Astro.props;
   data-mode={mode}
   data-state="idle"
   aria-label="小阿雷互动助手"
-  hidden
+  hidden={mode !== 'room'}
 >
   <div class="mascot-dialog" id="mascot-dialog" hidden>
     <div class="mascot-dialog-head">
@@ -38,9 +38,11 @@ const { mode = 'floating' } = Astro.props;
       </button>
     </div>
   </div>
-  <button class="mascot-hide" id="mascot-hide" type="button" aria-label="收起小阿雷">
-    <Icon name="minus" size={16} />
-  </button>
+  {mode !== 'room' && (
+    <button class="mascot-hide" id="mascot-hide" type="button" aria-label="收起小阿雷">
+      <Icon name="minus" size={16} />
+    </button>
+  )}
   <button
     class="mascot-character"
     id="mascot-character"
@@ -67,16 +69,12 @@ const { mode = 'floating' } = Astro.props;
     </span>
   </button>
 </aside>
-<button
-  class:list={['mascot-wake', { 'room-mascot-wake': mode === 'room' }]}
-  id="mascot-wake"
-  type="button"
-  aria-label="唤醒小阿雷"
-  hidden
->
-  <span>雷</span>
-  <span>小阿雷</span>
-</button>
+{mode !== 'room' && (
+  <button class="mascot-wake" id="mascot-wake" type="button" aria-label="唤醒小阿雷" hidden>
+    <span>雷</span>
+    <span>小阿雷</span>
+  </button>
+)}
 <script>
   import '../scripts/mascot';
 </script>
