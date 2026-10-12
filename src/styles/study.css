@@ -318,6 +318,9 @@
   z-index: 12;
   pointer-events: none;
 }
+#room-hotspots .room-mascot:not([data-room-ready='true']) {
+  visibility: hidden;
+}
 .room-mascot .mascot-character,
 .room-mascot .mascot-character:hover,
 .room-mascot[data-state] .mascot-character {

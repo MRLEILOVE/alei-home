@@ -500,6 +500,8 @@ async function buildRoom() {
     if (disposed || document.hidden) return;
     renderer.render(scene, camera);
     positionLabels();
+    // 首帧画面及人物投影就绪后，才显示人物旁的对话入口。
+    if (mascotRoot.dataset.roomReady !== 'true') mascotRoot.dataset.roomReady = 'true';
   }
   function animate(time: number) {
     frame = 0;
