@@ -2,9 +2,20 @@
 import { Image } from 'astro:assets';
 import character from '../assets/alei-mascot.png';
 import Icon from './Icon.astro';
+interface Props {
+  mode?: 'floating' | 'room';
+}
+const { mode = 'floating' } = Astro.props;
 ---
 
-<aside class="mascot" id="mascot" data-state="idle" aria-label="小阿雷互动助手" hidden>
+<aside
+  class:list={['mascot', { 'room-mascot': mode === 'room' }]}
+  id="mascot"
+  data-mode={mode}
+  data-state="idle"
+  aria-label="小阿雷互动助手"
+  hidden
+>
   <div class="mascot-dialog" id="mascot-dialog" hidden>
     <div class="mascot-dialog-head">
       <span>小阿雷</span>
@@ -38,19 +49,31 @@ import Icon from './Icon.astro';
     aria-controls="mascot-dialog"
     aria-expanded="false"
   >
-    <Image
-      src={character}
-      alt="穿黑衣、背斜挎包、戴小米手环的小阿雷"
-      width={180}
-      format="webp"
-      loading="lazy"
-    />
+    {mode === 'room' ? (
+      <span class="room-mascot-label" aria-hidden="true">
+        聊聊
+      </span>
+    ) : (
+      <Image
+        src={character}
+        alt="穿黑衣、背斜挎包、戴小米手环的小阿雷"
+        width={180}
+        format="webp"
+        loading="lazy"
+      />
+    )}
     <span class="mascot-music" aria-hidden="true">
       ♫
     </span>
   </button>
 </aside>
-<button class="mascot-wake" id="mascot-wake" type="button" aria-label="唤醒小阿雷" hidden>
+<button
+  class:list={['mascot-wake', { 'room-mascot-wake': mode === 'room' }]}
+  id="mascot-wake"
+  type="button"
+  aria-label="唤醒小阿雷"
+  hidden
+>
   <span>雷</span>
   <span>小阿雷</span>
 </button>

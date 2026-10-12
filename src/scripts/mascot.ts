@@ -5,6 +5,7 @@ const dialog = document.querySelector<HTMLElement>('#mascot-dialog');
 const message = document.querySelector<HTMLElement>('#mascot-message');
 
 if (mascot && wake && character && dialog && message) {
+  const inRoom = mascot.dataset.mode === 'room';
   const storageKey = 'alei-mascot-collapsed';
   let audioPlaying = false;
   let greetingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -41,7 +42,7 @@ if (mascot && wake && character && dialog && message) {
       }
     }
   }
-  let collapsed = window.matchMedia('(max-width: 600px)').matches;
+  let collapsed = !inRoom && window.matchMedia('(max-width: 600px)').matches;
   try {
     const saved = localStorage.getItem(storageKey);
     if (saved !== null) collapsed = saved === 'true';
@@ -100,10 +101,17 @@ if (mascot && wake && character && dialog && message) {
         const target = document.querySelector<HTMLElement>(
           action === 'read' ? '#writing' : '#music',
         );
-        target?.scrollIntoView({
-          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-          block: 'start',
-        });
+        if (inRoom) {
+          document.dispatchEvent(
+            new CustomEvent('alei:mascot-navigate', {
+              detail: { id: action === 'read' ? 'writing' : 'music', trigger: button },
+            }),
+          );
+        } else
+          target?.scrollIntoView({
+            behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+            block: 'start',
+          });
         showDialog(
           action === 'read'
             ? '这里有我的职场日记，也有生活里的小念头。'
@@ -111,8 +119,10 @@ if (mascot && wake && character && dialog && message) {
               ? '这几首都是常听的歌，挑一首吧。也可以听听有声书导读。'
               : '歌单正在准备，也可以先听听有声书导读。',
         );
-        const control = target?.querySelector<HTMLElement>('a, button');
-        control?.focus({ preventScroll: true });
+        if (!inRoom) {
+          const control = target?.querySelector<HTMLElement>('a, button');
+          control?.focus({ preventScroll: true });
+        }
       }
     });
   });

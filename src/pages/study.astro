@@ -1,0 +1,180 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HomeContent from '../components/HomeContent.astro';
+import SeasonAtmosphere from '../components/SeasonAtmosphere.astro';
+import SeasonCurtain from '../components/SeasonCurtain.astro';
+import Mascot from '../components/Mascot.astro';
+import { getImage } from 'astro:assets';
+import seasonsArt from '../assets/four-seasons.png';
+import journalArt from '../assets/journal-cover-art-v1.png';
+import { recommendedBooks } from '../data/leisure';
+import '../styles/study.css';
+const landscape = await getImage({ src: seasonsArt, width: 1600, format: 'webp' });
+const journal = await getImage({ src: journalArt, width: 320, format: 'webp' });
+const bookCovers = await Promise.all(
+  recommendedBooks
+    .filter((book) => book.ebook)
+    .map(
+      async (book) => (await getImage({ src: book.ebook!.cover, width: 166, format: 'webp' })).src,
+    ),
+);
+const destinations = [
+  ['writing', '01', '读点文字'],
+  ['projects', '02', '看看作品'],
+  ['music', '03', '听一会儿'],
+  ['games', '04', '小游戏'],
+  ['books', '05', '书籍推荐'],
+  ['friends', '06', '友情链接'],
+  ['guestbook', '07', '留言板'],
+  ['main', '08', '关于阿雷'],
+];
+---
+
+<Layout title="阿雷的3D小家 · 四季里，慢慢生活">
+  <SeasonAtmosphere />
+  <SeasonCurtain />
+  <main class="study-app" id="room-main">
+    <header class="room-header">
+      <a class="room-brand" href={import.meta.env.BASE_URL} aria-label="阿雷的四季小家，返回原网站">
+        <span class="room-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="56" height="56" fill="none" focusable="false">
+            <path class="brand-roof" d="M11 31.5 29.5 16 46 30M16.5 28v12M41 27v13" />
+            <path class="brand-stem" d="M43 26c3-3.5 3.3-7.8 4.5-11" />
+            <path class="brand-leaf" d="M45.5 19C43.5 11.5 49 7.5 56 7c-.7 7.5-3.7 11.2-10.5 12Z" />
+            <path class="brand-leaf-vein" d="m46 18 6.5-7" />
+            <g class="brand-window">
+              <rect x="25" y="28" width="5" height="5" rx="1" />
+              <rect x="32" y="28" width="5" height="5" rx="1" />
+              <rect x="25" y="35" width="5" height="5" rx="1" />
+              <rect x="32" y="35" width="5" height="5" rx="1" />
+            </g>
+            <path
+              class="brand-book"
+              d="M8 41c8-1.5 15.5-.2 23 5.5 7.5-5.7 15-7 23-5.5v8c-8-1.3-15.5.2-23 5.5C23.5 49.2 16 47.7 8 49Z"
+            />
+            <path class="brand-pages" d="M12 44c6.5-.4 12 1.2 19 6M50 44c-6.5-.4-12 1.2-19 6" />
+          </svg>
+        </span>
+        <span class="room-brand-copy">
+          <span class="room-brand-title">
+            <span class="room-brand-owner">阿雷的</span>
+            <strong>四季小家</strong>
+          </span>
+          <small aria-hidden="true">FOUR SEASONS, ONE HOME</small>
+        </span>
+      </a>
+      <a class="room-return" href={import.meta.env.BASE_URL}>
+        <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true">
+          <path d="m3 9 7-6 7 6M5 8v9h10V8M8 17v-5h4v5" />
+        </svg>
+        <span>返回原网站</span>
+        <span class="room-return-arrow" aria-hidden="true">
+          ↗
+        </span>
+      </a>
+    </header>
+    <div class="room-intro">
+      <span>THE EVERYDAY / 四季日常</span>
+      <h1>
+        把日子，
+        <br />
+        过成喜欢的样子。
+      </h1>
+      <p>
+        一室一厅，一点烟火气。
+        <br />
+        看小阿雷与猫，过平凡的一天。
+      </p>
+    </div>
+    <section
+      id="room-stage"
+      aria-label="可交互的一室一厅住宅，包含卧室、客厅、厨房和卫生间。小阿雷按一天的作息生活，狸花猫自由活动并回窝睡觉。"
+      data-landscape={landscape.src}
+      data-journal={journal.src}
+      data-book-covers={JSON.stringify(bookCovers)}
+    >
+      <div id="room-canvas"></div>
+      <div id="room-hotspots" aria-label="书房物件">
+        <Mascot mode="room" />
+      </div>
+    </section>
+    <aside class="room-life" aria-label="小阿雷的一天">
+      <div class="room-life-clock">
+        <span id="life-light" aria-hidden="true">
+          ☀
+        </span>
+        <time id="life-clock">06:40</time>
+        <span id="life-day">第 1 天</span>
+      </div>
+      <p id="life-activity" aria-live="polite">
+        新的一天，慢慢醒来。
+      </p>
+      <div class="room-life-track" aria-hidden="true">
+        <i id="life-progress"></i>
+      </div>
+      <div class="room-life-controls">
+        <button id="life-pause" type="button" aria-pressed="false">
+          暂停日常
+        </button>
+        <button id="life-speed" type="button" aria-label="切换日常播放速度">
+          日常速度 ×1
+        </button>
+      </div>
+      <small>时间慢慢走，生活也有自己的节奏。</small>
+    </aside>
+    <div class="room-tools">
+      <button id="room-reset" type="button">
+        ↺ 回到全景
+      </button>
+      <button id="room-follow" type="button" aria-pressed="false">
+        跟随小阿雷
+      </button>
+      <button id="room-labels" type="button" aria-pressed="true">
+        隐藏内容入口
+      </button>
+    </div>
+    <div class="room-caption">
+      <span class="room-dot"></span>
+      <span id="room-status" role="status">
+        正在布置小家… 内容可以通过下方目录打开。
+      </span>
+      <button id="room-audio" type="button" hidden>
+        Ⅱ 暂停音乐
+      </button>
+    </div>
+    <nav class="room-nav" aria-label="书房内容目录">
+      {destinations.map(([id, number, label]) => (
+        <a href={`#${id}`} data-room-open={id}>
+          <small>{number}</small>
+          {label}
+        </a>
+      ))}
+    </nav>
+    <footer class="room-footer">
+      <span>深圳 · 中国</span>
+      <span>春生 · 夏长 · 秋收 · 冬藏</span>
+      <button type="button" data-room-open="signature">
+        写在页末 ↗
+      </button>
+    </footer>
+  </main>
+  <dialog id="room-content" aria-label="书房内容">
+    <div class="room-panel-bar">
+      <span id="room-panel-title">书房里的日常</span>
+      <button id="room-close" type="button" autofocus>
+        回到书房 ×
+      </button>
+    </div>
+    <div class="room-panel-body">
+      <HomeContent study />
+    </div>
+  </dialog>
+  <noscript>
+    <p class="room-noscript">
+      3D 书房需要 JavaScript。<a href={import.meta.env.BASE_URL}>前往原网站阅读全部内容 →</a>
+    </p>
+  </noscript>
+  <script>
+    import '../scripts/study';
+  </script>
+</Layout>

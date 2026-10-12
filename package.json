@@ -11,12 +11,14 @@
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1 --port 4330",
     "check": "astro check",
-    "verify": "node scripts/verify-build.mjs"
+    "verify": "node scripts/verify-build.mjs",
+    "verify:study": "node scripts/verify-study.mjs"
   },
   "dependencies": {
     "aplayer": "1.10.1",
     "astro": "^7.3.5",
-    "epubjs": "0.3.93"
+    "epubjs": "0.3.93",
+    "three": "^0.186.1"
   },
   "overrides": {
     "epubjs": {
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@types/three": "^0.186.0",
     "prettier": "^3.9.9",
     "prettier-plugin-astro": "^1.1.0",
     "typescript": "^5.9.3"

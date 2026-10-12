@@ -6,6 +6,11 @@ const root = process.cwd();
 const dist = path.join(root, 'dist');
 const base = `/${(process.env.BASE_PATH || '').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
 const html = await readFile(path.join(dist, 'index.html'), 'utf8');
+const studyHtml = await readFile(path.join(dist, 'study', 'index.html'), 'utf8');
+assert(html.includes(`href="${base}study/"`), '首页缺少 3D 书房入口或入口未带部署子路径');
+const mainContent = (document) => document.match(/<main id="main"[^>]*>([\s\S]*?)<\/main>/)?.[1];
+assert(mainContent(html), '首页主要内容不存在');
+assert.equal(mainContent(studyHtml), mainContent(html), '3D 书房与原站的主要内容不一致');
 const decode = (value) =>
   value
     .replace(/&quot;/g, '"')
