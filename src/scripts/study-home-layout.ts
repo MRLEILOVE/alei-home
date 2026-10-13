@@ -8,6 +8,7 @@ export const HOME_FIXTURES = {
   bed: { x: -5.25, z: -2.8, width: 1.9, depth: 2.6, mattressTop: 0.64 },
   wardrobe: { x: -2.15, z: -4.22, width: 2.05, depth: 0.72 },
   desk: { x: -1.55, z: 0.04, width: 2.1, depth: 0.8 },
+  deskChair: { x: -1.55, z: 1.05, width: 1.12, depth: 0.7, seatTop: 0.45 },
   sofa: { x: -4.85, z: 0.3, width: 2.55, depth: 1.05 },
   coffeeTable: { x: -4.85, z: 2.05, width: 1.5, depth: 0.75 },
   kitchenCounter: { x: 6.15, z: 1.85, width: 1.1, depth: 3.4, top: 0.92 },
@@ -32,6 +33,7 @@ export type HomeActivity =
   | 'wash-dishes'
   | 'clean'
   | 'laundry'
+  | 'work'
   | 'read'
   | 'shower'
   | 'toilet'
@@ -46,7 +48,8 @@ export const HOME_ACTIVITY_SPOTS = {
   'wash-dishes': { x: 5.14, z: 0.9, yaw: Math.PI / 2 },
   clean: { x: 5.14, z: 1.75, yaw: Math.PI / 2 },
   laundry: { x: 4.46, z: -1.48, yaw: -Math.PI / 2 },
-  read: { x: -1.55, z: 1.18, yaw: Math.PI },
+  work: { x: -1.55, z: 1.05, yaw: Math.PI },
+  read: { x: -1.55, z: 1.05, yaw: Math.PI },
   shower: { x: 5.96, z: -1.57, yaw: Math.PI },
   toilet: { x: 6.04, z: -3.3, yaw: 0 },
   sleep: { x: -5.25, z: -1.82, yaw: 0 },
@@ -55,12 +58,14 @@ export const HOME_ACTIVITY_SPOTS = {
 /** 睡姿脚端、床边站位和导航图分开，进出床铺由日程控制器平滑衔接。 */
 export const HOME_BED_ENTRY = { x: -3.75, z: -1.82 } as const;
 export const HOME_TOILET_ENTRY = { x: 6.04, z: -2.8 } as const;
+export const HOME_DESK_CHAIR_ENTRY = { x: -1.55, z: 1.55 } as const;
 
 export const HOME_WAYPOINT_INDEX = {
   living: 0,
   hall: 1,
   idle: 2,
   read: 3,
+  work: 3,
   catGateway: 6,
   bedroomDoor: 9,
   sleep: 11,
@@ -92,6 +97,7 @@ export const HOME_WALKING_LAYOUT = {
     { name: 'kitchen-side-wall-north', minX: 2.62, maxX: 2.78, minZ: -0.5, maxZ: 1.3 },
     { name: 'kitchen-side-wall-south', minX: 2.62, maxX: 2.78, minZ: 3.35, maxZ: 4.7 },
     { name: 'desk', minX: -2.6, maxX: -0.5, minZ: -0.36, maxZ: 0.44 },
+    { name: 'desk-chair', minX: -2.11, maxX: -0.99, minZ: 0.75, maxZ: 1.0 },
     { name: 'sofa', minX: -6.125, maxX: -3.575, minZ: -0.225, maxZ: 0.825 },
     { name: 'coffee-table', minX: -5.6, maxX: -4.1, minZ: 1.675, maxZ: 2.425 },
     { name: 'living-bookcase', minX: -6.425, maxX: -5.875, minZ: 0.65, maxZ: 1.95 },
@@ -110,7 +116,7 @@ export const HOME_WALKING_LAYOUT = {
     { x: 0.95, z: 1.18 },
     { x: 0.95, z: 2.2 },
     HOME_ACTIVITY_SPOTS.idle,
-    HOME_ACTIVITY_SPOTS.read,
+    HOME_DESK_CHAIR_ENTRY,
     { x: -2.95, z: 1.35 },
     { x: -5.75, z: 2.9 },
     { x: -5.75, z: 3.0 },

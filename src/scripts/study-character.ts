@@ -552,11 +552,25 @@ export function createStudyCharacter(): StudyCharacter {
         pose.headX = 0.07;
         break;
       case 'read':
+        pose.lower = 0.19;
+        pose.legX = -Math.PI / 2;
+        pose.kneeX = Math.PI / 2;
         pose.armsX = [-1.2, -1.2];
         pose.armsZ = [0.15, -0.15];
         pose.elbowsX = [-0.75, -0.75];
         pose.headX = 0.2;
         pose.headY = Math.sin(elapsed * 0.5) * 0.028;
+        break;
+      case 'work':
+        pose.lower = 0.19;
+        pose.legX = -Math.PI / 2;
+        pose.kneeX = Math.PI / 2;
+        pose.lean = 0.05;
+        pose.armsX = [-1.08, -1.08];
+        pose.armsZ = [0.2, -0.2];
+        pose.elbowsX = [-0.88, -0.88];
+        pose.headX = 0.14;
+        pose.headY = Math.sin(elapsed * 0.8) * 0.02;
         break;
       case 'shower':
         pose.armsX = [-2.94 + stroke * 0.1, -2.94 - stroke * 0.1];
@@ -606,6 +620,7 @@ export function createStudyCharacter(): StudyCharacter {
       'wash-dishes',
       'clean',
       'laundry',
+      'work',
       'read',
       'shower',
       'toilet',
@@ -719,7 +734,11 @@ export function createStudyCharacter(): StudyCharacter {
     }
     const blend = (base: number, value: number) => base * (1 - totalWeight) + value;
     const lower = blend(crouch, weighted.lower);
-    const seated = (activityWeights.get('eat') ?? 0) + (activityWeights.get('toilet') ?? 0);
+    const seated =
+      (activityWeights.get('eat') ?? 0) +
+      (activityWeights.get('toilet') ?? 0) +
+      (activityWeights.get('work') ?? 0) +
+      (activityWeights.get('read') ?? 0);
     hips.position.y = 0.448 - lower;
     upperBody.position.y = 0.49 - lower;
     upperBody.rotation.x = blend(upperBody.rotation.x, weighted.lean);
@@ -785,7 +804,7 @@ export function createStudyCharacter(): StudyCharacter {
     },
     wave: () => {
       if (
-        ['sleep', 'eat', 'toilet'].some(
+        ['sleep', 'eat', 'toilet', 'work', 'read'].some(
           (kind) => activity === kind || (activityWeights.get(kind as HomeActivity) ?? 0) > 0.3,
         )
       )

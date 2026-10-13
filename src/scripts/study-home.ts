@@ -552,6 +552,34 @@ export function createStudyHome(options: HomeOptions) {
   }
   const deskLamp = lamp(-2.35, 0.936, -0.13, 0.85);
   addDestination(desk, 'writing', '文字', -1.55, 1.18, 0.04);
+  const deskChair = group(
+    HOME_FIXTURES.deskChair.x,
+    0.05,
+    HOME_FIXTURES.deskChair.z,
+    'home-desk-chair',
+  );
+  box(1.12, 0.1, 0.7, walnut, 0, 0.38, 0, deskChair, 0.06);
+  box(1.0, 0.11, 0.58, sage, 0, 0.45, -0.015, deskChair, 0.09);
+  cylinder(0.065, 0.3, steel, 0, 0.22, 0, deskChair);
+  for (let spoke = 0; spoke < 5; spoke++) {
+    const angle = (spoke / 5) * Math.PI * 2;
+    const base = box(0.58, 0.045, 0.065, steel, 0, 0.07, 0, deskChair, 0.02);
+    base.rotation.y = angle;
+    sphere(
+      0.058,
+      0.035,
+      0.058,
+      charcoal,
+      Math.cos(angle) * 0.3,
+      0.05,
+      Math.sin(angle) * 0.3,
+      deskChair,
+    );
+  }
+  for (const x of [-0.42, 0.42])
+    box(0.05, 0.48, 0.05, steel, x, 0.69, 0.27, deskChair, 0.018);
+  box(1.0, 0.48, 0.12, deepSage, 0, 0.77, 0.27, deskChair, 0.06);
+  box(0.82, 0.34, 0.055, linen, 0, 0.77, 0.2, deskChair, 0.035);
   const laptop = group(-1.18, 0.944, -0.16, 'home-project-laptop');
   box(0.58, 0.035, 0.39, steel, 0, 0, 0.03, laptop, 0.018);
   box(0.5, 0.005, 0.21, charcoal, 0, 0.021, 0.04, laptop, 0.002);

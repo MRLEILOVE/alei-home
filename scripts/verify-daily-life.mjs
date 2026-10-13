@@ -25,7 +25,8 @@ function seeded(initial) {
 }
 const onFixture = (frame) =>
   ['boarding', 'sleeping', 'alighting'].includes(frame.phase) ||
-  (frame.activity === 'toilet' && ['sitting', 'acting', 'standing'].includes(frame.phase));
+  (['toilet', 'work', 'read'].includes(frame.activity) &&
+    ['sitting', 'acting', 'standing'].includes(frame.phase));
 
 function checkLife(frame, previous) {
   assert(

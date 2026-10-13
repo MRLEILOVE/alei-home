@@ -2,6 +2,7 @@ import {
   HOME_ACTIVITY_SPOTS,
   HOME_FIXTURES,
   HOME_BED_ENTRY,
+  HOME_DESK_CHAIR_ENTRY,
   HOME_TOILET_ENTRY,
   HOME_WAYPOINT_INDEX,
   type HomeActivity,
@@ -40,7 +41,7 @@ export const STUDY_DAILY_SCHEDULE: readonly DailyStep[] = (
     { activity: 'wash-dishes', label: '洗早餐的碗', minute: 490, duration: 10 },
     { activity: 'clean', label: '擦台面，收拾厨房', minute: 510, duration: 8 },
     { activity: 'laundry', label: '洗衣服', minute: 540, duration: 11 },
-    { activity: 'read', label: '在书桌前工作和阅读', minute: 600, duration: 32 },
+    { activity: 'work', label: '在书桌前工作', minute: 600, duration: 32 },
     { activity: 'idle', label: '休息一会儿，陪陪狸花猫', minute: 660, duration: 14 },
     { activity: 'cook', label: '做午饭', minute: 710, duration: 17 },
     { activity: 'eat', label: '吃午饭', minute: 740, duration: 12 },
@@ -67,9 +68,12 @@ const BED_LIFT_SECONDS = 3;
 const BED_TRAVEL_SECONDS = 2.3;
 const BED_POSE_SECONDS = 2.2;
 const SEAT_SECONDS = 1;
+const DESK_SEAT_SECONDS = 1.3;
 const smooth = (value: number) => value * value * (3 - 2 * value);
 const pointDistance = (a: FloorPoint, b: FloorPoint) => Math.hypot(a.x - b.x, a.z - b.z);
-const isSeated = (activity: HomeActivity) => activity === 'eat' || activity === 'toilet';
+const isSeated = (activity: HomeActivity) =>
+  activity === 'eat' || activity === 'toilet' || activity === 'work' || activity === 'read';
+const isDeskChairSeated = (activity: HomeActivity) => activity === 'work' || activity === 'read';
 const floorElevation = (point: FloorPoint) => {
   if (point.z < -1.9 || point.x < 4.45) return 0;
   const distance = pointDistance(point, HOME_ACTIVITY_SPOTS.shower);
@@ -112,7 +116,7 @@ export function createStudyDailyLife(random: () => number = Math.random, now?: (
       (step.activity === 'sleep'
         ? 2 * (BED_LIFT_SECONDS + BED_TRAVEL_SECONDS + BED_POSE_SECONDS)
         : isSeated(step.activity)
-          ? SEAT_SECONDS * 2
+          ? (isDeskChairSeated(step.activity) ? DESK_SEAT_SECONDS : SEAT_SECONDS) * 2
           : 0)
     );
   });
@@ -267,27 +271,43 @@ export function createStudyDailyLife(random: () => number = Math.random, now?: (
         advance();
       }
     } else if (phase === 'sitting') {
-      const blend = smooth(Math.min(1, phaseElapsed / SEAT_SECONDS));
+      const seatSeconds = isDeskChairSeated(step.activity) ? DESK_SEAT_SECONDS : SEAT_SECONDS;
+      const blend = smooth(Math.min(1, phaseElapsed / seatSeconds));
       person.elevation = blend * 0.18;
       if (step.activity === 'toilet') {
         person.z =
           HOME_TOILET_ENTRY.z + (HOME_ACTIVITY_SPOTS.toilet.z - HOME_TOILET_ENTRY.z) * blend;
         walker.position.z = person.z;
+      } else if (isDeskChairSeated(step.activity)) {
+        person.x =
+          HOME_DESK_CHAIR_ENTRY.x + (HOME_ACTIVITY_SPOTS[step.activity].x - HOME_DESK_CHAIR_ENTRY.x) * blend;
+        person.z =
+          HOME_DESK_CHAIR_ENTRY.z + (HOME_ACTIVITY_SPOTS[step.activity].z - HOME_DESK_CHAIR_ENTRY.z) * blend;
+        walker.position.x = person.x;
+        walker.position.z = person.z;
       }
-      if (phaseElapsed >= SEAT_SECONDS) {
+      if (phaseElapsed >= seatSeconds) {
         phase = 'acting';
         phaseElapsed = 0;
       }
     } else if (phase === 'standing') {
-      const blend = smooth(Math.min(1, phaseElapsed / SEAT_SECONDS));
+      const seatSeconds = isDeskChairSeated(step.activity) ? DESK_SEAT_SECONDS : SEAT_SECONDS;
+      const blend = smooth(Math.min(1, phaseElapsed / seatSeconds));
       person.elevation = (1 - blend) * 0.18;
       if (step.activity === 'toilet') {
         person.z =
           HOME_ACTIVITY_SPOTS.toilet.z +
           (HOME_TOILET_ENTRY.z - HOME_ACTIVITY_SPOTS.toilet.z) * blend;
         walker.position.z = person.z;
+      } else if (isDeskChairSeated(step.activity)) {
+        person.x =
+          HOME_ACTIVITY_SPOTS[step.activity].x + (HOME_DESK_CHAIR_ENTRY.x - HOME_ACTIVITY_SPOTS[step.activity].x) * blend;
+        person.z =
+          HOME_ACTIVITY_SPOTS[step.activity].z + (HOME_DESK_CHAIR_ENTRY.z - HOME_ACTIVITY_SPOTS[step.activity].z) * blend;
+        walker.position.x = person.x;
+        walker.position.z = person.z;
       }
-      if (phaseElapsed >= SEAT_SECONDS) {
+      if (phaseElapsed >= seatSeconds) {
         person.elevation = 0;
         advance();
       }

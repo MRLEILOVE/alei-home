@@ -84,6 +84,7 @@ for (const fixture of [
   'home-wardrobe',
   'home-living-sofa',
   'home-writing-desk',
+  'home-desk-chair',
   'home-fridge',
   'home-kitchen-sink',
   'home-stove',

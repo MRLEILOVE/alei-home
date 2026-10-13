@@ -558,7 +558,9 @@ async function buildRoom() {
     });
     lastSocial = companionState.social;
     characterRig.setPetting(companionState.petting && !chatting);
-    const keepSeatedOrSleeping = ['sleep', 'eat', 'toilet'].includes(lifeState.poseActivity);
+    const keepSeatedOrSleeping = ['sleep', 'eat', 'toilet', 'work', 'read'].includes(
+      lifeState.poseActivity,
+    );
     const poseActivity = chatting && !keepSeatedOrSleeping ? 'idle' : lifeState.poseActivity;
     characterRig.setActivity(poseActivity, poseActivity === 'sleep' ? 1 : lifeState.progress);
     if (character.visible) {
