@@ -30,7 +30,7 @@ function openContent(id: string, trigger?: HTMLElement) {
       ? panel.querySelector<HTMLElement>('.signature')
       : panel.querySelector<HTMLElement>(`#${id}`);
   document.querySelector('#room-panel-title')!.textContent =
-    target?.querySelector('h2, h1')?.textContent?.trim().replace(/\s+/g, ' ') || '书房里的日常';
+    target?.querySelector('h2, h1')?.textContent?.trim().replace(/\s+/g, ' ') || '小别墅里的日常';
   requestAnimationFrame(() => {
     if (target)
       scroller.scrollTop +=
@@ -99,6 +99,7 @@ async function buildRoom() {
   const THREE = await import('three');
   const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
   const { createStudyHome } = await import('./study-home');
+  const { createStudyVillaExterior } = await import('./study-villa-exterior');
   const { createStudyDailyLife } = await import('./study-daily-life');
   const { createStudyCharacter } = await import('./study-character');
   const { createStudyCompanions } = await import('./study-companions');
@@ -108,47 +109,48 @@ async function buildRoom() {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.type = THREE.VSMShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
+  renderer.toneMappingExposure = 1.08;
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.setAttribute('aria-hidden', 'true');
   mount.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 120);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enablePan = false;
   controls.enableDamping = false;
   controls.minPolarAngle = Math.PI / 5;
-  controls.maxPolarAngle = Math.PI / 2.6;
-  controls.minAzimuthAngle = -0.15;
-  controls.maxAzimuthAngle = Math.PI / 2.2;
-  controls.minDistance = 14;
-  controls.maxDistance = 48;
+  controls.maxPolarAngle = Math.PI / 2.12;
+  controls.minAzimuthAngle = -Infinity;
+  controls.maxAzimuthAngle = Infinity;
+  controls.minDistance = 16;
+  controls.maxDistance = 58;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const ambient = new THREE.HemisphereLight(0xfff6e6, 0x8d7660, 1.9);
+  const ambient = new THREE.HemisphereLight(0xfff8eb, 0x718173, 1.15);
   scene.add(ambient);
-  const sun = new THREE.DirectionalLight(0xffedca, 3.1);
-  sun.position.set(-5, 12, 7);
+  const sun = new THREE.DirectionalLight(0xffedca, 2.35);
+  sun.position.set(-7, 14, 9);
   sun.castShadow = true;
   sun.shadow.mapSize.set(
     mount.clientWidth < 650 ? 1024 : 2048,
     mount.clientWidth < 650 ? 1024 : 2048,
   );
   sun.shadow.radius = 3;
+  sun.shadow.blurSamples = 8;
   Object.assign(sun.shadow.camera, {
-    left: -12,
-    right: 12,
-    top: 11,
-    bottom: -11,
+    left: -15,
+    right: 15,
+    top: 15,
+    bottom: -15,
     near: 0.5,
-    far: 45,
+    far: 55,
   });
   sun.shadow.normalBias = 0.04;
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0xffffff, 1);
-  fill.position.set(-4, 5, 1);
+  const fill = new THREE.DirectionalLight(0xddeeff, 0.42);
+  fill.position.set(8, 7, 11);
   scene.add(fill);
   // 在本地绘制轻量材质，木纹、布纹和墙纸随三维物件变化。
   const ownedTextures: InstanceType<typeof THREE.Texture>[] = [];
@@ -250,8 +252,10 @@ async function buildRoom() {
     journal: imageTexture(stage.dataset.journal!),
     bookCovers: (JSON.parse(stage.dataset.bookCovers || '[]') as string[]).map(imageTexture),
   });
-  scene.add(home.group);
-  contact(0, 0.25, 17, 12.5, -0.34, 0.28);
+  const villa = createStudyVillaExterior();
+  villa.group.add(home.group);
+  scene.add(villa.group);
+  contact(0, 0.25, 17, 12.5, -0.04, 0.16);
   for (const entry of home.destinations)
     destination(entry.object, entry.id, entry.label, entry.point);
   const spaceLabels = [
@@ -259,6 +263,10 @@ async function buildRoom() {
     ['客厅', -3.0, 0.1, 2.6],
     ['厨房', 4.45, 0.1, 2.9],
     ['卫生间', 5.18, 0.9, -3.35],
+    ['花园', -4.45, 0.65, 7.4],
+    ['鱼池', 4.55, 0.45, 7.65],
+    ['泳池', 9.62, 0.35, 0.15],
+    ['车库', -9.6, 0.8, -0.7],
   ] as const;
   const spaceMarkers = spaceLabels.map(([label, x, y, z]) => {
     const element = document.createElement('span');
@@ -315,7 +323,7 @@ async function buildRoom() {
   let pressedCharacter = false;
   let lastMascotState = '';
   let lifePaused = false;
-  let showContentLabels = true;
+  let showContentLabels = false;
   let following = false;
   let frameDrivingCamera = false;
   const pauseButton = document.querySelector<HTMLButtonElement>('#life-pause')!;
@@ -376,7 +384,7 @@ async function buildRoom() {
   // 时钟不依赖渲染帧率，聊天、阅读、暂停活动或减少动态效果时仍与现实一致。
   const wallClockTimer = window.setInterval(updateLifeDisplay, 1000);
   function updateLabelControl() {
-    labelsButton.textContent = showContentLabels ? '隐藏内容入口' : '显示内容入口';
+    labelsButton.textContent = showContentLabels ? '隐藏场景标注' : '显示场景标注';
     labelsButton.setAttribute('aria-pressed', String(showContentLabels));
   }
   labelsButton.addEventListener('click', () => {
@@ -472,6 +480,7 @@ async function buildRoom() {
       element.style.top = `${y}px`;
       // 遮挡时保留标签尺寸，避免 hidden 使宽度归零后逐帧交替显隐。
       element.style.visibility =
+        !showContentLabels ||
         projected.z > 1 ||
         (character.visible &&
           Math.abs(x - headX) < element.offsetWidth / 2 + bodyHalfWidth &&
@@ -605,9 +614,10 @@ async function buildRoom() {
     stage.dataset.catRoutine = companionState.catRoutine;
     stage.dataset.catBedBlend = catPose.bedBlend.toFixed(3);
     home.animate(simulationDelta, poseActivity, lifeState.progress, lifeState.daylight);
-    ambient.intensity = 0.75 + lifeState.daylight * 1.15;
-    sun.intensity = 0.48 + lifeState.daylight * 2.5;
-    fill.intensity = 0.35 + lifeState.daylight * 0.65;
+    villa.animate(simulationDelta);
+    ambient.intensity = 0.72 + lifeState.daylight * 0.43;
+    sun.intensity = 0.45 + lifeState.daylight * 1.9;
+    fill.intensity = 0.2 + lifeState.daylight * 0.22;
     updateLifeDisplay();
     if (following && character.visible && !manipulating) {
       const target =
@@ -671,7 +681,7 @@ async function buildRoom() {
     };
     const [x, y, wallColor, lightColor] = config[season] || config.autumn;
     landscape.offset.set(x, y);
-    home.group.traverse((item) => {
+    villa.group.traverse((item) => {
       if (item instanceof THREE.Mesh && item.userData.seasonWall) {
         const material = item.material as InstanceType<typeof THREE.MeshStandardMaterial>;
         material.color.setHex(wallColor);
@@ -707,8 +717,8 @@ async function buildRoom() {
   mascotRoot.addEventListener('focusout', updateAnimation);
   function reset() {
     setFollowing(false);
-    camera.position.set(14, 12, 16).multiplyScalar(mount.clientWidth < 650 ? 1.35 : 1);
-    controls.target.set(0, 0.8, 0);
+    camera.position.set(0.4, 16, 28).multiplyScalar(mount.clientWidth < 650 ? 1.25 : 1);
+    controls.target.set(0, 0.9, 1.05);
     controls.update();
     render();
   }
@@ -788,7 +798,7 @@ async function buildRoom() {
   renderer.domElement.addEventListener('webglcontextrestored', () => {
     renderer.shadowMap.needsUpdate = true;
     render();
-    status.textContent = '拖动看看四周 · 点击物件，打开一段日常';
+    status.textContent = '拖动环看整座别墅 · 点击物件，打开一段日常';
   });
   window.addEventListener('pagehide', (event) => {
     if (event.persisted) return;
@@ -818,12 +828,13 @@ async function buildRoom() {
   character.visible = !mascotRoot.hidden;
   characterShadow.visible = character.visible;
   home.animate(0, lifeState.poseActivity, lifeState.progress, lifeState.daylight);
+  villa.animate(0);
   updateLifeDisplay();
   resize();
   seasonChanged();
-  status.textContent = '拖动看看四周 · 点击物件，打开一段日常';
+  status.textContent = '拖动环看整座别墅 · 点击物件，打开一段日常';
 }
 buildRoom().catch((error) => {
-  console.error('3D 书房初始化失败', error);
-  status.textContent = '当前设备未能加载 3D；下方目录仍可打开全部内容，也可以返回原网站。';
+  console.error('3D 小别墅初始化失败', error);
+  status.textContent = '当前设备未能加载 3D 小别墅；下方目录仍可打开全部内容，也可以返回原网站。';
 });

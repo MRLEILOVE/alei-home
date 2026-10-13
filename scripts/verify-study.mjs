@@ -5,6 +5,7 @@ import { createStudyCat } from '../src/scripts/study-cat.ts';
 import { createStudyCatBed } from '../src/scripts/study-cat-bed.ts';
 import { STUDY_CAT_HOME } from '../src/scripts/study-cat-home.ts';
 import { createStudyHome } from '../src/scripts/study-home.ts';
+import { createStudyVillaExterior } from '../src/scripts/study-villa-exterior.ts';
 import { HOME_ACTIVITY_SPOTS } from '../src/scripts/study-home-layout.ts';
 import { createRoomRoaming, ROOM_ROAMING_LAYOUT as layout } from '../src/scripts/study-roaming.ts';
 
@@ -126,6 +127,256 @@ home.group.traverse((item) =>
     '住宅物件动画产生无效坐标',
   ),
 );
+const villa = createStudyVillaExterior();
+for (const structure of [
+  'villa-transparent-shell',
+  'villa-pitched-roof',
+  'villa-front-door',
+  'villa-stone-terrace',
+  'villa-facade-plinth',
+  'villa-chimney',
+  'villa-porch-gable',
+  'villa-porch-lantern',
+  'villa-lawn-details',
+  'villa-perimeter-hedge',
+  'villa-landscape-tree-back-left',
+  'villa-landscape-tree-back-right',
+  'villa-flower-garden',
+  'villa-garden-bench',
+  'villa-fish-pond',
+  'villa-swimming-pool',
+  'villa-stone-lion-left',
+  'villa-stone-lion-right',
+  'villa-pond-turtle',
+  'villa-pond-floor',
+  'villa-pond-pebbles',
+  'villa-pond-ripples',
+  'villa-pond-lilies',
+  'villa-pond-reeds',
+  'villa-pool-floor',
+  'villa-pool-tile-grid',
+  'villa-pool-ripples',
+  'villa-pool-steps',
+  'villa-pool-deck-detail',
+  'villa-pool-float-ring',
+  'villa-garage',
+  'villa-garage-transparent-shell',
+  'villa-garage-driveway',
+  'villa-porsche-sports-car',
+])
+  assert(villa.group.getObjectByName(structure), `小别墅缺少完整构造：${structure}`);
+const villaBounds = new THREE.Box3().setFromObject(villa.group);
+const villaSize = villaBounds.getSize(new THREE.Vector3());
+assert(
+  villaSize.x >= 24 && villaSize.y >= 4.5 && villaSize.z >= 18,
+  '小别墅没有完整展示建筑与前后庭院',
+);
+for (const detail of [
+  'villa-stone-terrace',
+  'villa-chimney',
+  'villa-porch-gable',
+  'villa-lawn-details',
+  'villa-perimeter-hedge',
+  'villa-landscape-tree-back-left',
+  'villa-landscape-tree-back-right',
+  'villa-garden-bench',
+  'villa-pond-pebbles',
+  'villa-pond-ripples',
+  'villa-pond-lilies',
+  'villa-pond-reeds',
+  'villa-pool-tile-grid',
+  'villa-pool-steps',
+  'villa-pool-ripples',
+  'villa-pool-deck-detail',
+  'villa-pool-float-ring',
+]) {
+  let detailMeshes = 0;
+  const detailObject = villa.group.getObjectByName(detail);
+  detailObject.traverse((item) => {
+    if (item instanceof THREE.Mesh) detailMeshes++;
+  });
+  assert(detailObject.visible && detailMeshes > 0, `小别墅精修构造为空或不可见：${detail}`);
+}
+for (let index = 1; index <= 5; index++)
+  assert(villa.group.getObjectByName(`villa-pond-fish-${index}`), `鱼池缺少第 ${index} 条小鱼`);
+const transparentPanels = [];
+villa.group.traverse((item) => {
+  assert(
+    [...item.position, ...item.quaternion, ...item.scale].every(Number.isFinite),
+    '小别墅构造产生无效坐标',
+  );
+  if (item.userData.seasonWall && item instanceof THREE.Mesh) transparentPanels.push(item);
+});
+assert(transparentPanels.length >= 8, '小别墅没有形成完整的半透明外壳');
+assert(
+  transparentPanels.every((item) => {
+    const materials = Array.isArray(item.material) ? item.material : [item.material];
+    return materials.every(
+      (panelMaterial) => panelMaterial.transparent && panelMaterial.opacity < 0.6,
+    );
+  }),
+  '小别墅外墙或屋顶不是半透明材质',
+);
+const garage = villa.group.getObjectByName('villa-garage');
+const garageShell = villa.group.getObjectByName('villa-garage-transparent-shell');
+const garageDriveway = villa.group.getObjectByName('villa-garage-driveway');
+const porsche = villa.group.getObjectByName('villa-porsche-sports-car');
+const garageShellMeshes = [];
+garageShell.traverse((item) => {
+  if (item instanceof THREE.Mesh) garageShellMeshes.push(item);
+});
+assert(garage.visible && garageShell.visible, '半透明车库不可见');
+assert(garageShellMeshes.length >= 3, '车库外壳没有形成完整的墙体与屋顶');
+assert(
+  garageShellMeshes.every((item) => {
+    const materials = Array.isArray(item.material) ? item.material : [item.material];
+    return materials.every(
+      (garageMaterial) =>
+        garageMaterial.transparent &&
+        garageMaterial.opacity > 0 &&
+        garageMaterial.opacity < 0.65 &&
+        !garageMaterial.depthWrite,
+    );
+  }),
+  '车库外壳没有使用通透且不遮挡内部跑车的材质',
+);
+let drivewayMeshes = 0;
+garageDriveway.traverse((item) => {
+  if (item instanceof THREE.Mesh) drivewayMeshes++;
+});
+assert(garageDriveway.visible && drivewayMeshes > 0, '车库车道为空或不可见');
+const garageShellBounds = new THREE.Box3().setFromObject(garageShell);
+const porscheBounds = new THREE.Box3().setFromObject(porsche);
+assert(!garageShellBounds.isEmpty() && !porscheBounds.isEmpty(), '车库或跑车没有可渲染体积');
+const garageShellSize = garageShellBounds.getSize(new THREE.Vector3());
+const porscheSize = porscheBounds.getSize(new THREE.Vector3());
+const porscheCenter = porscheBounds.getCenter(new THREE.Vector3());
+assert(
+  porscheCenter.x >= garageShellBounds.min.x - 0.5 &&
+    porscheCenter.x <= garageShellBounds.max.x + 0.5 &&
+    porscheCenter.z >= garageShellBounds.min.z - 0.5 &&
+    porscheCenter.z <= garageShellBounds.max.z + 0.5 &&
+    porscheCenter.y >= garageShellBounds.min.y - 0.25 &&
+    porscheCenter.y <= garageShellBounds.max.y + 0.25,
+  '保时捷跑车没有停放在半透明车库内',
+);
+const porscheHorizontalSize = [porscheSize.x, porscheSize.z].sort((a, b) => a - b);
+const garageHorizontalSize = [garageShellSize.x, garageShellSize.z].sort((a, b) => a - b);
+assert(
+  porscheHorizontalSize[0] >= 1.2 &&
+    porscheHorizontalSize[1] >= 2.6 &&
+    porscheSize.y >= 0.55 &&
+    porscheHorizontalSize[0] < garageHorizontalSize[0] &&
+    porscheHorizontalSize[1] < garageHorizontalSize[1],
+  '保时捷跑车的比例不合理或无法容纳在车库内',
+);
+const porscheMeshes = [];
+const porscheMaterials = [];
+const namedWheelParts = [];
+porsche.traverse((item) => {
+  if (item.name.startsWith('villa-porsche-wheel-')) namedWheelParts.push(item);
+  if (!(item instanceof THREE.Mesh)) return;
+  porscheMeshes.push(item);
+  const materials = Array.isArray(item.material) ? item.material : [item.material];
+  porscheMaterials.push(...materials);
+});
+assert(porsche.visible && porscheMeshes.length >= 10, '保时捷跑车结构过于简略或不可见');
+assert(
+  porscheMaterials.some(
+    (carMaterial) =>
+      (carMaterial instanceof THREE.MeshPhysicalMaterial && carMaterial.clearcoat >= 0.2) ||
+      (carMaterial instanceof THREE.MeshStandardMaterial &&
+        carMaterial.roughness <= 0.5 &&
+        carMaterial.metalness >= 0.1),
+  ),
+  '保时捷跑车缺少有光泽的车漆材质',
+);
+const porscheWheels = namedWheelParts.filter((item) => {
+  let ancestor = item.parent;
+  while (ancestor && ancestor !== porsche) {
+    if (ancestor.name.startsWith('villa-porsche-wheel-')) return false;
+    ancestor = ancestor.parent;
+  }
+  return true;
+});
+assert.equal(porscheWheels.length, 4, '保时捷跑车应有四个独立车轮');
+for (const wheel of porscheWheels) {
+  let wheelMeshes = 0;
+  wheel.traverse((item) => {
+    if (item instanceof THREE.Mesh) wheelMeshes++;
+  });
+  const wheelSize = new THREE.Box3().setFromObject(wheel).getSize(new THREE.Vector3());
+  assert(wheel.visible && wheelMeshes > 0, `车轮为空或不可见：${wheel.name}`);
+  assert(Math.max(wheelSize.x, wheelSize.y, wheelSize.z) >= 0.3, `车轮尺寸过小：${wheel.name}`);
+}
+const frontDoor = villa.group.getObjectByName('villa-front-door');
+const leftLion = villa.group.getObjectByName('villa-stone-lion-left');
+const rightLion = villa.group.getObjectByName('villa-stone-lion-right');
+const doorPosition = frontDoor.getWorldPosition(new THREE.Vector3());
+const leftLionPosition = leftLion.getWorldPosition(new THREE.Vector3());
+const rightLionPosition = rightLion.getWorldPosition(new THREE.Vector3());
+assert(
+  leftLionPosition.x < doorPosition.x && rightLionPosition.x > doorPosition.x,
+  '两座石狮没有分列在别墅入口两侧',
+);
+assert(
+  Math.abs((leftLionPosition.x + rightLionPosition.x) / 2 - doorPosition.x) < 0.2,
+  '两座石狮没有围绕入口对称摆放',
+);
+for (const [side, lion] of [
+  ['左', leftLion],
+  ['右', rightLion],
+]) {
+  const lionSize = new THREE.Box3().setFromObject(lion).getSize(new THREE.Vector3());
+  assert(lionSize.y >= 1.4, `${side}侧石狮不够醒目`);
+}
+function assertTransparentWater(name) {
+  const surface = villa.group.getObjectByName(name);
+  assert(surface instanceof THREE.Mesh, `水面不是立体网格：${name}`);
+  const materials = Array.isArray(surface.material) ? surface.material : [surface.material];
+  assert(
+    materials.every(
+      (waterMaterial) =>
+        waterMaterial.transparent && waterMaterial.opacity > 0.2 && !waterMaterial.depthWrite,
+    ),
+    `水面缺少通透层次：${name}`,
+  );
+  return { surface, materials };
+}
+const pondWater = assertTransparentWater('villa-pond-water');
+const poolWater = assertTransparentWater('villa-pool-water');
+const pondFish = villa.group.getObjectByName('villa-pond-fish-1');
+const fishStart = pondFish.position.clone();
+const pondTurtle = villa.group.getObjectByName('villa-pond-turtle');
+const turtleStart = pondTurtle.position.clone();
+const pondOpacity = pondWater.materials.map((waterMaterial) => waterMaterial.opacity);
+const poolOpacity = poolWater.materials.map((waterMaterial) => waterMaterial.opacity);
+const pondRipple = villa.group.getObjectByName('villa-pond-ripples').children[0];
+const pondRippleScale = pondRipple.scale.clone();
+const poolRipple = villa.group.getObjectByName('villa-pool-ripples').children[0];
+const poolRipplePosition = poolRipple.position.clone();
+const floatRing = villa.group.getObjectByName('villa-pool-float-ring');
+const floatRingPosition = floatRing.position.clone();
+for (let frame = 0; frame < 120; frame++) villa.animate(1 / 30);
+assert(pondFish.position.distanceTo(fishStart) > 0.1, '鱼池里的小鱼没有游动');
+assert(pondTurtle.position.distanceTo(turtleStart) > 0.1, '鱼池里的乌龟没有游动');
+assert(
+  pondWater.materials.some((waterMaterial, index) => waterMaterial.opacity !== pondOpacity[index]),
+  '鱼池水面没有动态变化',
+);
+assert(
+  poolWater.materials.some((waterMaterial, index) => waterMaterial.opacity !== poolOpacity[index]),
+  '泳池水面没有动态变化',
+);
+assert(pondRipple.scale.distanceTo(pondRippleScale) > 0.01, '鱼池水波没有扩散动画');
+assert(poolRipple.position.distanceTo(poolRipplePosition) > 0.01, '泳池水纹没有漂移动画');
+assert(floatRing.position.distanceTo(floatRingPosition) > 0.005, '泳池浮圈没有随水面漂浮');
+villa.group.traverse((item) =>
+  assert(
+    [...item.position, ...item.quaternion, ...item.scale].every(Number.isFinite),
+    '小别墅精修动画产生无效坐标',
+  ),
+);
 const cat = createStudyCat();
 let catMeshes = 0;
 cat.group.traverse((item) => {
@@ -235,7 +486,7 @@ assert.deepEqual(
   '暂停消耗了路线或停留时间',
 );
 console.log(
-  `书房验证通过：${meshes} 个人物部件、${catMeshes} 个狸花猫部件、软垫猫窝与蜷睡闭眼/醒来动作、${layout.edges.length} 条避障连接、36000 帧随机行走、交互暂停与恢复。`,
+  `小别墅验证通过：半透明全景、花园、鱼池、泳池、双石狮、${meshes} 个人物部件、${catMeshes} 个狸花猫部件、软垫猫窝与蜷睡闭眼/醒来动作、${layout.edges.length} 条避障连接、36000 帧随机行走、交互暂停与恢复。`,
 );
 await import('./verify-study-labels.mjs');
 await import('./verify-real-time.mjs');

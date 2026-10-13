@@ -30,12 +30,16 @@ const destinations = [
 ];
 ---
 
-<Layout title="阿雷的3D小家 · 四季里，慢慢生活">
+<Layout title="阿雷的3D小别墅 · 四季里，慢慢生活">
   <SeasonAtmosphere />
   <SeasonCurtain />
   <main class="study-app" id="room-main">
     <header class="room-header">
-      <a class="room-brand" href={import.meta.env.BASE_URL} aria-label="阿雷的四季小家，返回原网站">
+      <a
+        class="room-brand"
+        href={import.meta.env.BASE_URL}
+        aria-label="阿雷的四季小别墅，返回原网站"
+      >
         <span class="room-brand-mark" aria-hidden="true">
           <svg viewBox="0 0 64 64" width="56" height="56" fill="none" focusable="false">
             <path class="brand-roof" d="M11 31.5 29.5 16 46 30M16.5 28v12M41 27v13" />
@@ -58,9 +62,9 @@ const destinations = [
         <span class="room-brand-copy">
           <span class="room-brand-title">
             <span class="room-brand-owner">阿雷的</span>
-            <strong>四季小家</strong>
+            <strong>四季小别墅</strong>
           </span>
-          <small aria-hidden="true">FOUR SEASONS, ONE HOME</small>
+          <small aria-hidden="true">FOUR SEASONS VILLA</small>
         </span>
       </a>
       <a class="room-return" href={import.meta.env.BASE_URL}>
@@ -74,27 +78,27 @@ const destinations = [
       </a>
     </header>
     <div class="room-intro">
-      <span>THE EVERYDAY / 四季日常</span>
+      <span>THE VILLA / 四季别墅</span>
       <h1>
         把日子，
         <br />
         过成喜欢的样子。
       </h1>
       <p>
-        一室一厅，一点烟火气。
+        一座小别墅，一整个庭院。
         <br />
-        看小阿雷与猫，过平凡的一天。
+        看小阿雷与猫，在花园和水边过一天。
       </p>
     </div>
     <section
       id="room-stage"
-      aria-label="可交互的一室一厅住宅，包含卧室、客厅、厨房和卫生间，客厅书桌配有电脑椅。小阿雷按一天的作息生活，工作和阅读时会坐在电脑椅上，狸花猫自由活动并回窝睡觉。"
+      aria-label="可环绕查看的半透明全景小别墅，包含卧室、客厅、厨房、卫生间、小花园、鱼池、游泳池和半透明车库。车库里停着一辆红色保时捷跑车，花园里种着鲜花，鱼池里有小鱼和乌龟，别墅门口有两座大石狮子。小阿雷按一天的作息生活，狸花猫自由活动并回窝睡觉。"
       data-landscape={landscape.src}
       data-journal={journal.src}
       data-book-covers={JSON.stringify(bookCovers)}
     >
       <div id="room-canvas"></div>
-      <div id="room-hotspots" aria-label="书房物件">
+      <div id="room-hotspots" aria-label="小别墅物件">
         <Mascot mode="room" />
       </div>
     </section>
@@ -127,20 +131,20 @@ const destinations = [
       <button id="room-follow" type="button" aria-pressed="false">
         跟随小阿雷
       </button>
-      <button id="room-labels" type="button" aria-pressed="true">
-        隐藏内容入口
+      <button id="room-labels" type="button" aria-pressed="false">
+        显示场景标注
       </button>
     </div>
     <div class="room-caption">
       <span class="room-dot"></span>
       <span id="room-status" role="status">
-        正在布置小家… 内容可以通过下方目录打开。
+        正在搭建小别墅全景… 内容可以通过下方目录打开。
       </span>
       <button id="room-audio" type="button" hidden>
         Ⅱ 暂停音乐
       </button>
     </div>
-    <nav class="room-nav" aria-label="书房内容目录">
+    <nav class="room-nav" aria-label="小别墅内容目录">
       {destinations.map(([id, number, label]) => (
         <a href={`#${id}`} data-room-open={id}>
           <small>{number}</small>
@@ -156,11 +160,11 @@ const destinations = [
       </button>
     </footer>
   </main>
-  <dialog id="room-content" aria-label="书房内容">
+  <dialog id="room-content" aria-label="小别墅内容">
     <div class="room-panel-bar">
-      <span id="room-panel-title">书房里的日常</span>
+      <span id="room-panel-title">小别墅里的日常</span>
       <button id="room-close" type="button" autofocus>
-        回到书房 ×
+        回到别墅 ×
       </button>
     </div>
     <div class="room-panel-body">
@@ -169,7 +173,7 @@ const destinations = [
   </dialog>
   <noscript>
     <p class="room-noscript">
-      3D 书房需要 JavaScript。<a href={import.meta.env.BASE_URL}>前往原网站阅读全部内容 →</a>
+      3D 小别墅需要 JavaScript。<a href={import.meta.env.BASE_URL}>前往原网站阅读全部内容 →</a>
     </p>
   </noscript>
   <script>

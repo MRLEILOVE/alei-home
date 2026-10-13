@@ -10,10 +10,10 @@ type HomeOptions = {
   bookCovers?: THREE.Texture[];
 };
 
-/** 以低隔墙保留四个房间的边界，从斜上方能看见生活和场景内容入口。 */
+/** 以半透明墙面保留四个房间的边界，从别墅全景中能看见室内生活和内容入口。 */
 export function createStudyHome(options: HomeOptions) {
   const home = new THREE.Group();
-  home.name = 'study-one-bedroom-home';
+  home.name = 'study-villa-interior';
   const destinations: {
     object: THREE.Object3D;
     id: string;
@@ -25,7 +25,13 @@ export function createStudyHome(options: HomeOptions) {
     roughness = 0.85,
     extra: THREE.MeshStandardMaterialParameters = {},
   ) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
-  const cream = material(0xeadfc8, 0.92, { map: options.plasterTexture ?? null });
+  const cream = material(0xeadfc8, 0.92, {
+    map: options.plasterTexture ?? null,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
   const wallEdge = material(0xf1e8d8);
   const walnut = material(0x805d3e, 0.82, { map: options.woodTexture ?? null });
   const oak = material(0xbd956b, 0.86, { map: options.woodTexture ?? null });
@@ -576,8 +582,7 @@ export function createStudyHome(options: HomeOptions) {
       deskChair,
     );
   }
-  for (const x of [-0.42, 0.42])
-    box(0.05, 0.48, 0.05, steel, x, 0.69, 0.27, deskChair, 0.018);
+  for (const x of [-0.42, 0.42]) box(0.05, 0.48, 0.05, steel, x, 0.69, 0.27, deskChair, 0.018);
   box(1.0, 0.48, 0.12, deepSage, 0, 0.77, 0.27, deskChair, 0.06);
   box(0.82, 0.34, 0.055, linen, 0, 0.77, 0.2, deskChair, 0.035);
   const laptop = group(-1.18, 0.944, -0.16, 'home-project-laptop');

@@ -426,7 +426,7 @@
   color: var(--ink);
 }
 .room-nav::before {
-  content: '书房目录';
+  content: '别墅目录';
   position: absolute;
   top: -9px;
   left: 50%;

@@ -1,0 +1,791 @@
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+export type StudyVillaGarage = {
+  group: THREE.Group;
+  animate: (elapsed: number) => void;
+};
+
+/**
+ * 小别墅左侧的半透明独立车库。
+ * 局部坐标的正 Z 方向为车库门，和庭院车道保持同一朝向。
+ */
+export function createStudyVillaGarage(): StudyVillaGarage {
+  const garage = new THREE.Group();
+  garage.name = 'villa-garage';
+  garage.position.set(-9.6, 0, -1);
+
+  const standard = (
+    color: number,
+    roughness = 0.8,
+    extra: THREE.MeshStandardMaterialParameters = {},
+  ) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
+  const concrete = standard(0xc8c3b8, 0.93);
+  const concreteEdge = standard(0xe1dbcc, 0.88);
+  const charcoal = standard(0x3b403f, 0.46, { metalness: 0.48 });
+  const steel = standard(0x8d9694, 0.35, { metalness: 0.72 });
+  const darkSteel = standard(0x252b2c, 0.34, { metalness: 0.68 });
+  const rubber = standard(0x171919, 0.9);
+  const wallGlass = new THREE.MeshPhysicalMaterial({
+    color: 0xdcebea,
+    roughness: 0.12,
+    metalness: 0.03,
+    transmission: 0.2,
+    transparent: true,
+    opacity: 0.19,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.16,
+  });
+  const roofGlass = wallGlass.clone();
+  roofGlass.color.setHex(0xb9d3d1);
+  roofGlass.opacity = 0.24;
+  const doorGlass = wallGlass.clone();
+  doorGlass.color.setHex(0xb5c8c8);
+  doorGlass.opacity = 0.27;
+  const lightMaterial = standard(0xfff2cf, 0.22, {
+    emissive: 0xffd590,
+    emissiveIntensity: 1.35,
+  });
+  const paintedRed = new THREE.MeshPhysicalMaterial({
+    color: 0xa9101e,
+    roughness: 0.2,
+    metalness: 0.22,
+    clearcoat: 1,
+    clearcoatRoughness: 0.055,
+  });
+  const paintedRedDark = new THREE.MeshPhysicalMaterial({
+    color: 0x630b14,
+    roughness: 0.25,
+    metalness: 0.22,
+    clearcoat: 0.88,
+    clearcoatRoughness: 0.08,
+  });
+  const carGlass = new THREE.MeshPhysicalMaterial({
+    color: 0x283c43,
+    roughness: 0.08,
+    metalness: 0.05,
+    transmission: 0.25,
+    transparent: true,
+    opacity: 0.56,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    clearcoat: 0.8,
+  });
+  const leather = standard(0x1e1d1c, 0.68);
+  const leatherAccent = standard(0x7e1018, 0.64);
+  const lampLens = new THREE.MeshPhysicalMaterial({
+    color: 0xf7f0d8,
+    roughness: 0.1,
+    transmission: 0.22,
+    transparent: true,
+    opacity: 0.88,
+    emissive: 0xffe5ac,
+    emissiveIntensity: 0.6,
+    clearcoat: 1,
+  });
+  const tailLens = new THREE.MeshPhysicalMaterial({
+    color: 0xb30916,
+    roughness: 0.16,
+    transparent: true,
+    opacity: 0.94,
+    emissive: 0x8f0610,
+    emissiveIntensity: 0.65,
+    clearcoat: 1,
+  });
+  const amberLens = standard(0xe6a52c, 0.25, {
+    emissive: 0x8f4d08,
+    emissiveIntensity: 0.42,
+  });
+  const gold = standard(0xc5a554, 0.3, { metalness: 0.72 });
+
+  function mesh(
+    geometry: THREE.BufferGeometry,
+    material: THREE.Material,
+    parent: THREE.Object3D,
+    name: string,
+    x = 0,
+    y = 0,
+    z = 0,
+  ) {
+    const item = new THREE.Mesh(geometry, material);
+    item.name = name;
+    item.position.set(x, y, z);
+    item.castShadow = !material.transparent;
+    item.receiveShadow = true;
+    parent.add(item);
+    return item;
+  }
+
+  function box(
+    width: number,
+    height: number,
+    depth: number,
+    material: THREE.Material,
+    parent: THREE.Object3D,
+    name: string,
+    x = 0,
+    y = 0,
+    z = 0,
+    radius = 0.03,
+  ) {
+    const rounding = Math.min(radius, width / 4, height / 4, depth / 4);
+    return mesh(
+      new RoundedBoxGeometry(width, height, depth, 2, rounding),
+      material,
+      parent,
+      name,
+      x,
+      y,
+      z,
+    );
+  }
+
+  function group(parent: THREE.Object3D, name: string, x = 0, y = 0, z = 0) {
+    const item = new THREE.Group();
+    item.name = name;
+    item.position.set(x, y, z);
+    parent.add(item);
+    return item;
+  }
+
+  // 地台、停车位与排水沟让车库从庭院地面自然抬起。
+  const foundation = group(garage, 'garage-foundation');
+  box(4.12, 0.22, 6.15, concrete, foundation, 'garage-floor-slab', 0, 0.05, 0, 0.08);
+  box(4.22, 0.12, 6.3, concreteEdge, foundation, 'garage-foundation-edge', 0, -0.055, 0, 0.08);
+  for (const x of [-0.86, 0.86])
+    box(0.07, 0.012, 4.65, concreteEdge, foundation, 'garage-parking-guide', x, 0.17, -0.2, 0.01);
+  const drain = group(foundation, 'garage-threshold-drain', 0, 0.165, 2.88);
+  box(3.76, 0.045, 0.21, darkSteel, drain, 'garage-drain-channel', 0, 0, 0, 0.012);
+  for (let index = -8; index <= 8; index++)
+    box(0.045, 0.018, 0.24, steel, drain, 'garage-drain-grate', index * 0.205, 0.032, 0, 0.005);
+
+  // 玻璃墙分片安装在深色钢构之间，透明但仍保留完整建筑轮廓。
+  const shell = group(garage, 'garage-building-structure');
+  const transparentShell = group(shell, 'villa-garage-transparent-shell');
+  const halfWidth = 2;
+  const halfDepth = 3.02;
+  for (const x of [-halfWidth, halfWidth])
+    for (const z of [-halfDepth, halfDepth]) {
+      box(0.16, 3.05, 0.16, charcoal, shell, 'garage-corner-column', x, 1.66, z, 0.025);
+      box(0.27, 0.13, 0.27, concreteEdge, shell, 'garage-column-foot', x, 0.2, z, 0.025);
+    }
+  for (const z of [-halfDepth, halfDepth])
+    box(4.12, 0.17, 0.17, charcoal, shell, 'garage-top-beam', 0, 3.13, z, 0.025);
+  for (const x of [-halfWidth, halfWidth])
+    box(0.17, 0.17, 6.12, charcoal, shell, 'garage-side-top-beam', x, 3.13, 0, 0.025);
+  for (const x of [-halfWidth, halfWidth]) {
+    for (const z of [-2.02, -1.01, 0, 1.01, 2.02])
+      box(0.09, 2.88, 0.09, charcoal, shell, 'garage-side-mullion', x, 1.67, z, 0.012);
+    for (const z of [-2.52, -1.51, -0.505, 0.505, 1.51, 2.52]) {
+      const panel = box(
+        0.055,
+        2.76,
+        0.94,
+        wallGlass,
+        transparentShell,
+        'garage-side-glass-panel',
+        x,
+        1.68,
+        z,
+        0.008,
+      );
+      panel.renderOrder = 3;
+    }
+  }
+  for (const x of [-1.08, 0, 1.08])
+    box(0.085, 2.88, 0.085, charcoal, shell, 'garage-back-mullion', x, 1.67, -halfDepth, 0.012);
+  for (const x of [-1.62, -0.54, 0.54, 1.62]) {
+    const panel = box(
+      1.01,
+      2.76,
+      0.055,
+      wallGlass,
+      transparentShell,
+      'garage-back-glass-panel',
+      x,
+      1.68,
+      -halfDepth,
+      0.008,
+    );
+    panel.renderOrder = 3;
+  }
+
+  // 正面采用分格式透明车库门，车辆从庭院里也能完整看见。
+  const door = group(shell, 'garage-sectional-glass-door', 0, 0, halfDepth + 0.012);
+  box(4.22, 0.15, 0.16, charcoal, door, 'garage-door-header', 0, 3.13, 0, 0.025);
+  for (const x of [-2.04, -1.02, 0, 1.02, 2.04])
+    box(0.085, 2.84, 0.1, charcoal, door, 'garage-door-vertical-frame', x, 1.68, 0, 0.012);
+  for (const y of [0.28, 0.98, 1.68, 2.38, 3.08])
+    box(4.13, 0.075, 0.1, charcoal, door, 'garage-door-horizontal-frame', 0, y, 0, 0.012);
+  for (let row = 0; row < 4; row++)
+    for (let column = 0; column < 4; column++) {
+      const panel = box(
+        0.94,
+        0.62,
+        0.045,
+        doorGlass,
+        door,
+        `garage-door-glass-${row + 1}-${column + 1}`,
+        -1.53 + column * 1.02,
+        0.63 + row * 0.7,
+        0.006,
+        0.008,
+      );
+      panel.renderOrder = 4;
+    }
+  box(0.5, 0.1, 0.09, steel, door, 'garage-door-handle', 0, 1.03, 0.095, 0.02);
+
+  // 双坡玻璃屋顶延续别墅的透明建筑语言，钢制椽条强化结构细节。
+  const roof = group(shell, 'garage-pitched-glass-roof');
+  const roofPitch = Math.atan2(0.95, 2.08);
+  const roofSlope = Math.hypot(2.08, 0.95) + 0.08;
+  for (const side of [-1, 1]) {
+    const panel = box(
+      roofSlope,
+      0.075,
+      6.42,
+      roofGlass,
+      transparentShell,
+      side < 0 ? 'garage-roof-glass-left' : 'garage-roof-glass-right',
+      side * 1.04,
+      3.61,
+      0,
+      0.018,
+    );
+    panel.rotation.z = side < 0 ? roofPitch : -roofPitch;
+    panel.renderOrder = 4;
+    for (const z of [-2.98, -1.5, 0, 1.5, 2.98]) {
+      const rafter = box(
+        roofSlope,
+        0.075,
+        0.07,
+        charcoal,
+        roof,
+        'garage-roof-rafter',
+        side * 1.04,
+        3.62,
+        z,
+        0.012,
+      );
+      rafter.rotation.z = side < 0 ? roofPitch : -roofPitch;
+    }
+  }
+  box(0.18, 0.18, 6.48, charcoal, roof, 'garage-roof-ridge', 0, 4.09, 0, 0.025);
+  const gableShape = new THREE.Shape();
+  gableShape.moveTo(-1.99, 0);
+  gableShape.lineTo(1.99, 0);
+  gableShape.lineTo(0, 0.92);
+  gableShape.closePath();
+  for (const z of [-3.035, 3.035]) {
+    const gable = mesh(
+      new THREE.ShapeGeometry(gableShape),
+      roofGlass,
+      transparentShell,
+      'garage-glass-gable',
+      0,
+      3.16,
+      z,
+    );
+    if (z < 0) gable.rotation.y = Math.PI;
+    gable.renderOrder = 4;
+    box(4.03, 0.09, 0.09, charcoal, roof, 'garage-gable-base', 0, 3.16, z, 0.012);
+    for (const side of [-1, 1]) {
+      const trim = box(
+        roofSlope,
+        0.075,
+        0.08,
+        charcoal,
+        roof,
+        'garage-gable-roof-trim',
+        side * 1.04,
+        3.62,
+        z,
+        0.012,
+      );
+      trim.rotation.z = side < 0 ? roofPitch : -roofPitch;
+    }
+  }
+
+  const lighting = group(garage, 'garage-interior-lighting');
+  for (const z of [-1.65, 0, 1.65]) {
+    box(1.55, 0.055, 0.14, charcoal, lighting, 'garage-ceiling-light-housing', 0, 2.96, z, 0.018);
+    box(
+      1.38,
+      0.025,
+      0.09,
+      lightMaterial,
+      lighting,
+      'garage-ceiling-light-strip',
+      0,
+      2.92,
+      z,
+      0.012,
+    );
+  }
+  for (const z of [-1.25, 1.25]) {
+    const light = new THREE.PointLight(0xffdfad, 0.58, 5.2, 2);
+    light.name = 'garage-warm-point-light';
+    light.position.set(0, 2.76, z);
+    lighting.add(light);
+  }
+
+  // 后墙的工具柜、置物架和灭火器补足真实车库的使用痕迹。
+  const storage = group(garage, 'garage-workshop-storage', 1.55, 0, -2.62);
+  box(0.86, 1.62, 0.42, charcoal, storage, 'garage-tool-cabinet', 0, 0.98, 0, 0.045);
+  for (const y of [0.45, 0.82, 1.19, 1.56]) {
+    box(0.72, 0.025, 0.035, steel, storage, 'garage-tool-drawer-line', 0, y, 0.225, 0.006);
+    box(0.22, 0.035, 0.045, steel, storage, 'garage-tool-drawer-handle', 0, y + 0.08, 0.24, 0.008);
+  }
+  const extinguisher = group(garage, 'garage-fire-extinguisher', -1.73, 0.16, -2.66);
+  const extinguisherBody = mesh(
+    new THREE.CylinderGeometry(0.13, 0.15, 0.62, 20),
+    paintedRed,
+    extinguisher,
+    'garage-fire-extinguisher-body',
+    0,
+    0.36,
+    0,
+  );
+  extinguisherBody.castShadow = true;
+  mesh(
+    new THREE.CylinderGeometry(0.045, 0.045, 0.16, 16),
+    darkSteel,
+    extinguisher,
+    'garage-fire-extinguisher-valve',
+    0,
+    0.73,
+    0,
+  );
+  box(
+    0.24,
+    0.05,
+    0.055,
+    darkSteel,
+    extinguisher,
+    'garage-fire-extinguisher-handle',
+    0.08,
+    0.8,
+    0,
+    0.012,
+  );
+
+  // 红色低矮宽体跑车，以 911 的圆灯、拱形车顶和后置宽肩为主要轮廓特征。
+  const car = group(garage, 'villa-porsche-sports-car', 0, 0.16, -0.25);
+  const body = group(car, 'porsche-clearcoat-body');
+  box(1.84, 0.39, 3.82, paintedRed, body, 'porsche-lower-body', 0, 0.47, 0, 0.16);
+  box(1.71, 0.3, 3.98, paintedRedDark, body, 'porsche-lower-side-shadow', 0, 0.34, -0.03, 0.13);
+  const frontNose = mesh(
+    new THREE.SphereGeometry(1, 36, 18),
+    paintedRed,
+    body,
+    'porsche-rounded-front-nose',
+    0,
+    0.68,
+    1.73,
+  );
+  frontNose.scale.set(0.92, 0.35, 0.6);
+  const hood = box(1.57, 0.2, 1.28, paintedRed, body, 'porsche-front-hood', 0, 0.83, 1.2, 0.13);
+  hood.rotation.x = -0.035;
+  const rearDeck = box(
+    1.74,
+    0.32,
+    1.08,
+    paintedRed,
+    body,
+    'porsche-rear-engine-deck',
+    0,
+    0.82,
+    -1.55,
+    0.13,
+  );
+  rearDeck.rotation.x = 0.045;
+  for (const z of [-1.34, 1.34])
+    for (const x of [-0.72, 0.72]) {
+      const fender = mesh(
+        new THREE.SphereGeometry(1, 28, 16),
+        paintedRed,
+        body,
+        'porsche-sculpted-fender',
+        x,
+        0.62,
+        z,
+      );
+      fender.scale.set(0.38, 0.39, 0.66);
+    }
+  for (const x of [-0.91, 0.91])
+    box(0.13, 0.23, 2.82, paintedRed, body, 'porsche-side-skirt', x, 0.31, -0.02, 0.045);
+  for (const x of [-0.66, 0.66])
+    box(0.035, 0.32, 1.35, charcoal, body, 'porsche-door-seam', x, 0.66, -0.18, 0.008);
+
+  const greenhouse = group(car, 'porsche-glass-cabin');
+  const cabinVertices = new Float32Array([
+    -0.72, 0.92, 0.72, 0.72, 0.92, 0.72, -0.56, 1.43, 0.34, 0.56, 1.43, 0.34, -0.61, 1.43, -0.58,
+    0.61, 1.43, -0.58, -0.75, 0.92, -1.24, 0.75, 0.92, -1.24,
+  ]);
+  const cabinGeometry = new THREE.BufferGeometry();
+  cabinGeometry.setAttribute('position', new THREE.BufferAttribute(cabinVertices, 3));
+  cabinGeometry.setIndex([
+    0, 1, 3, 0, 3, 2, 2, 3, 5, 2, 5, 4, 4, 5, 7, 4, 7, 6, 0, 2, 4, 0, 4, 6, 1, 7, 5, 1, 5, 3,
+  ]);
+  cabinGeometry.computeVertexNormals();
+  const cabinGlass = mesh(cabinGeometry, carGlass, greenhouse, 'porsche-wraparound-glazing');
+  cabinGlass.renderOrder = 5;
+  box(1.21, 0.09, 0.96, paintedRed, greenhouse, 'porsche-roof-panel', 0, 1.45, -0.12, 0.08);
+  box(
+    1.46,
+    0.055,
+    0.055,
+    charcoal,
+    greenhouse,
+    'porsche-windshield-lower-frame',
+    0,
+    0.94,
+    0.73,
+    0.01,
+  );
+  box(
+    1.19,
+    0.055,
+    0.055,
+    charcoal,
+    greenhouse,
+    'porsche-windshield-upper-frame',
+    0,
+    1.43,
+    0.34,
+    0.01,
+  );
+  for (const x of [-0.72, 0.72]) {
+    const pillar = box(
+      0.055,
+      0.055,
+      0.65,
+      charcoal,
+      greenhouse,
+      'porsche-a-pillar',
+      x,
+      1.18,
+      0.53,
+      0.01,
+    );
+    pillar.rotation.x = -0.65;
+    const rearPillar = box(
+      0.06,
+      0.06,
+      0.78,
+      paintedRed,
+      greenhouse,
+      'porsche-c-pillar',
+      x,
+      1.18,
+      -0.91,
+      0.012,
+    );
+    rearPillar.rotation.x = 0.73;
+  }
+
+  const interior = group(car, 'porsche-cockpit-interior');
+  box(1.34, 0.18, 0.44, leather, interior, 'porsche-dashboard', 0, 0.98, 0.5, 0.07);
+  box(0.42, 0.13, 1.0, leather, interior, 'porsche-center-console', 0, 0.72, -0.02, 0.055);
+  for (const x of [-0.37, 0.37]) {
+    const seat = group(
+      interior,
+      x < 0 ? 'porsche-driver-seat' : 'porsche-passenger-seat',
+      x,
+      0,
+      -0.35,
+    );
+    box(0.52, 0.17, 0.62, leather, seat, 'porsche-seat-cushion', 0, 0.7, 0, 0.11);
+    const seatBack = box(0.51, 0.76, 0.18, leather, seat, 'porsche-seat-back', 0, 1.02, -0.19, 0.1);
+    seatBack.rotation.x = -0.13;
+    box(0.38, 0.21, 0.16, leatherAccent, seat, 'porsche-seat-headrest', 0, 1.43, -0.26, 0.08);
+    box(
+      0.045,
+      0.55,
+      0.02,
+      leatherAccent,
+      seat,
+      'porsche-seat-center-stripe',
+      0,
+      1.03,
+      -0.09,
+      0.008,
+    );
+  }
+  const steering = mesh(
+    new THREE.TorusGeometry(0.18, 0.028, 10, 28),
+    leather,
+    interior,
+    'porsche-steering-wheel',
+    -0.38,
+    1.08,
+    0.38,
+  );
+  steering.rotation.x = -0.36;
+  mesh(
+    new THREE.CylinderGeometry(0.065, 0.065, 0.055, 18),
+    charcoal,
+    interior,
+    'porsche-steering-wheel-hub',
+    -0.38,
+    1.08,
+    0.38,
+  ).rotation.x = Math.PI / 2;
+  for (let gauge = -1; gauge <= 1; gauge++)
+    mesh(
+      new THREE.CylinderGeometry(0.07, 0.07, 0.016, 20),
+      gauge === 0 ? lightMaterial : charcoal,
+      interior,
+      'porsche-dashboard-gauge',
+      -0.38 + gauge * 0.12,
+      1.06,
+      0.69,
+    ).rotation.x = Math.PI / 2;
+
+  const wheels = group(car, 'porsche-four-wheel-assembly');
+  for (const axle of [
+    { z: 1.34, label: 'front' },
+    { z: -1.38, label: 'rear' },
+  ] as const)
+    for (const side of [
+      { x: -0.94, label: 'left' },
+      { x: 0.94, label: 'right' },
+    ] as const) {
+      const wheel = group(
+        wheels,
+        `villa-porsche-wheel-${axle.label}-${side.label}`,
+        side.x,
+        0.48,
+        axle.z,
+      );
+      const tire = mesh(
+        new THREE.TorusGeometry(0.29, 0.105, 12, 30),
+        rubber,
+        wheel,
+        'porsche-performance-tire',
+      );
+      tire.rotation.y = Math.PI / 2;
+      const rim = mesh(
+        new THREE.CylinderGeometry(0.245, 0.245, 0.16, 28),
+        steel,
+        wheel,
+        'porsche-alloy-rim',
+      );
+      rim.rotation.z = Math.PI / 2;
+      for (let spoke = 0; spoke < 10; spoke++) {
+        const spokeMesh = box(
+          0.035,
+          0.21,
+          0.025,
+          darkSteel,
+          wheel,
+          'porsche-rim-spoke',
+          side.x < 0 ? -0.092 : 0.092,
+          0,
+          0,
+          0.006,
+        );
+        spokeMesh.rotation.x = (spoke / 10) * Math.PI * 2;
+      }
+      const brakeDisc = mesh(
+        new THREE.CylinderGeometry(0.17, 0.17, 0.012, 24),
+        darkSteel,
+        wheel,
+        'porsche-brake-disc',
+      );
+      brakeDisc.rotation.z = Math.PI / 2;
+      box(
+        0.04,
+        0.15,
+        0.08,
+        paintedRed,
+        wheel,
+        'porsche-red-brake-caliper',
+        side.x < 0 ? -0.102 : 0.102,
+        0,
+        -0.12,
+        0.012,
+      );
+      mesh(
+        new THREE.CylinderGeometry(0.055, 0.055, 0.18, 18),
+        gold,
+        wheel,
+        'porsche-wheel-center-cap',
+      ).rotation.z = Math.PI / 2;
+    }
+
+  const frontDetails = group(car, 'porsche-front-details');
+  for (const x of [-0.59, 0.59]) {
+    const lamp = mesh(
+      new THREE.SphereGeometry(1, 24, 14),
+      lampLens,
+      frontDetails,
+      'porsche-oval-headlamp',
+      x,
+      0.82,
+      1.93,
+    );
+    lamp.scale.set(0.235, 0.18, 0.055);
+    const indicator = box(
+      0.22,
+      0.055,
+      0.035,
+      amberLens,
+      frontDetails,
+      'porsche-front-indicator',
+      x,
+      0.57,
+      2.055,
+      0.02,
+    );
+    indicator.rotation.x = -0.05;
+  }
+  box(1.48, 0.1, 0.08, paintedRedDark, frontDetails, 'porsche-front-bumper', 0, 0.4, 2.02, 0.035);
+  for (const x of [-0.48, 0, 0.48])
+    box(
+      0.28,
+      0.085,
+      0.04,
+      darkSteel,
+      frontDetails,
+      'porsche-front-air-intake',
+      x,
+      0.45,
+      2.09,
+      0.025,
+    );
+  const crestShape = new THREE.Shape();
+  crestShape.moveTo(-0.045, 0.06);
+  crestShape.lineTo(0.045, 0.06);
+  crestShape.lineTo(0.035, -0.045);
+  crestShape.lineTo(0, -0.072);
+  crestShape.lineTo(-0.035, -0.045);
+  crestShape.closePath();
+  const crest = mesh(
+    new THREE.ShapeGeometry(crestShape),
+    gold,
+    frontDetails,
+    'porsche-hood-crest',
+    0,
+    0.951,
+    1.37,
+  );
+  crest.rotation.x = -Math.PI / 2 + 0.035;
+
+  const rearDetails = group(car, 'porsche-rear-details');
+  box(
+    1.55,
+    0.105,
+    0.055,
+    tailLens,
+    rearDetails,
+    'porsche-full-width-tail-light',
+    0,
+    0.76,
+    -2.02,
+    0.03,
+  );
+  for (let vent = -4; vent <= 4; vent++)
+    box(
+      0.08,
+      0.025,
+      0.32,
+      darkSteel,
+      rearDetails,
+      'porsche-engine-deck-vent',
+      vent * 0.15,
+      1.01,
+      -1.55,
+      0.006,
+    );
+  const spoiler = group(rearDetails, 'porsche-rear-spoiler', 0, 0, -1.74);
+  for (const x of [-0.56, 0.56])
+    box(0.07, 0.28, 0.09, paintedRedDark, spoiler, 'porsche-spoiler-support', x, 1.09, 0, 0.015);
+  const wing = box(
+    1.58,
+    0.1,
+    0.34,
+    paintedRed,
+    spoiler,
+    'porsche-spoiler-wing',
+    0,
+    1.25,
+    -0.03,
+    0.055,
+  );
+  wing.rotation.x = -0.06;
+  box(1.52, 0.13, 0.1, paintedRedDark, rearDetails, 'porsche-rear-bumper', 0, 0.42, -2.04, 0.035);
+  for (const x of [-0.55, 0.55]) {
+    const exhaust = mesh(
+      new THREE.CylinderGeometry(0.07, 0.07, 0.19, 18),
+      darkSteel,
+      rearDetails,
+      'porsche-dual-exhaust-tip',
+      x,
+      0.33,
+      -2.08,
+    );
+    exhaust.rotation.x = Math.PI / 2;
+  }
+
+  for (const x of [-0.85, 0.85]) {
+    const mirror = group(
+      car,
+      x < 0 ? 'porsche-left-mirror' : 'porsche-right-mirror',
+      x,
+      1.05,
+      0.48,
+    );
+    box(
+      0.08,
+      0.08,
+      0.22,
+      paintedRed,
+      mirror,
+      'porsche-mirror-stalk',
+      x < 0 ? 0.05 : -0.05,
+      0,
+      -0.04,
+      0.025,
+    );
+    const shellMesh = mesh(
+      new THREE.SphereGeometry(1, 20, 12),
+      paintedRed,
+      mirror,
+      'porsche-mirror-shell',
+      x < 0 ? -0.04 : 0.04,
+      0.04,
+      0.04,
+    );
+    shellMesh.scale.set(0.17, 0.09, 0.12);
+    box(
+      0.013,
+      0.1,
+      0.15,
+      carGlass,
+      mirror,
+      'porsche-mirror-glass',
+      x < 0 ? -0.155 : 0.155,
+      0.04,
+      0.04,
+      0.008,
+    );
+  }
+
+  // 车库照明仅做非常轻微的呼吸变化，避免静态灯带显得生硬。
+  const ceilingLights = lighting.children.filter(
+    (item): item is THREE.Mesh =>
+      item instanceof THREE.Mesh && item.name === 'garage-ceiling-light-strip',
+  );
+  function animate(elapsed: number) {
+    const intensity = 1.25 + Math.sin(elapsed * 0.7) * 0.06;
+    for (const item of ceilingLights) {
+      const material = item.material;
+      if (material instanceof THREE.MeshStandardMaterial) material.emissiveIntensity = intensity;
+    }
+  }
+
+  return { group: garage, animate };
+}

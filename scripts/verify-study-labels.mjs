@@ -20,6 +20,7 @@ const positionLabels = new Function(
   'catX',
   'catY',
   'catPadding',
+  'showContentLabels',
   source.slice(start, end),
 );
 const camera = new THREE.Camera();
@@ -55,6 +56,7 @@ for (const [name, labelWidth] of [
       catX,
       catY,
       5,
+      true,
     );
     return visible();
   };
@@ -65,5 +67,7 @@ for (const [name, labelWidth] of [
   for (let i = 0; i < 120; i++)
     assert(!frame(0, 400, 300), `${name} 被猫遮挡后在第 ${i + 1} 帧闪回`);
   assert(frame(0), `${name} 猫离开后未恢复`);
+  positionLabels(markers, camera, 800, 600, { visible: true }, 0, 275, 335, 20, 0, 0, 5, false);
+  assert(!visible(), `${name} 在默认关闭场景标注时仍然显示`);
 }
-console.log('房间标签验证通过：4 个标签的连续帧人物遮挡、猫遮挡及离开恢复。');
+console.log('房间标签验证通过：4 个标签的默认隐藏、连续帧遮挡及离开恢复。');
