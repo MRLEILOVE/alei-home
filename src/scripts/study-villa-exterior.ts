@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createStudyVillaGarage } from './study-villa-garage.ts';
+import { createStudyVillaUpper } from './study-villa-upper.ts';
 
 type Swimmer = {
   object: THREE.Group;
@@ -229,6 +230,22 @@ export function createStudyVillaExterior() {
     box(0.64, 0.12, 0.64, warmStone, x, 1.0, 10.26, fence, 0.06);
     sphere(0.11, 0.11, 0.11, warmLight, x, 1.15, 10.26, fence);
   }
+  // 前院保留两处入口，其余三边连续围合，栏杆与现有入口使用同样的木色。
+  const perimeter = group(0, 0, 0, 'villa-perimeter-fence', fence);
+  for (const x of [-12.55, 12.55]) {
+    for (let i = 0; i <= 19; i++) {
+      const z = -8.5 + i * (18.86 / 19);
+      box(0.09, 0.86, 0.09, wood, x, 0.37, z, perimeter, 0.016);
+      sphere(0.07, 0.055, 0.07, bronze, x, 0.84, z, perimeter);
+    }
+    for (const y of [0.24, 0.64]) box(0.065, 0.07, 18.86, wood, x, y, 0.93, perimeter, 0.012);
+  }
+  for (let i = 0; i <= 25; i++) {
+    const x = -12.55 + i * (25.1 / 25);
+    box(0.09, 0.86, 0.09, wood, x, 0.37, -8.5, perimeter, 0.016);
+    sphere(0.07, 0.055, 0.07, bronze, x, 0.84, -8.5, perimeter);
+  }
+  for (const y of [0.24, 0.64]) box(25.1, 0.07, 0.065, wood, 0, y, -8.5, perimeter, 0.012);
 
   // 左侧车库拥有独立车行入口，浅色铺装从车库门连续延伸到前院门。
   const driveway = group(-9.6, 0, 6.25, 'villa-garage-driveway');
@@ -321,53 +338,8 @@ export function createStudyVillaExterior() {
     box(0.65, 0.045, 0.045, bronze, x, 0.55, 0.08, frontDoor, 0.008);
     box(0.65, 0.045, 0.045, bronze, x, 1.65, 0.08, frontDoor, 0.008);
   }
-  const roof = group(0, 0, 0, 'villa-pitched-roof', shell);
-  const roofPitch = Math.atan2(1.7, 4.9);
-  const roofLength = Math.hypot(4.9, 1.7) + 0.25;
-  const frontRoof = box(14.35, 0.075, roofLength, roofGlass, 0, 3.72, 2.43, roof, 0.025);
-  frontRoof.rotation.x = roofPitch;
-  frontRoof.userData.seasonWall = true;
-  frontRoof.renderOrder = 4;
-  const backRoof = box(14.35, 0.075, roofLength, roofGlass, 0, 3.72, -2.43, roof, 0.025);
-  backRoof.rotation.x = -roofPitch;
-  backRoof.userData.seasonWall = true;
-  backRoof.renderOrder = 4;
-  box(14.42, 0.14, 0.14, roofTrim, 0, 4.57, 0, roof, 0.025, 'villa-roof-ridge');
-  for (const x of [-6.98, -3.49, 0, 3.49, 6.98]) {
-    const frontRafter = box(0.052, 0.06, roofLength, roofTrim, x, 3.72, 2.43, roof, 0.012);
-    frontRafter.rotation.x = roofPitch;
-    const backRafter = box(0.052, 0.06, roofLength, roofTrim, x, 3.72, -2.43, roof, 0.012);
-    backRafter.rotation.x = -roofPitch;
-  }
-  for (const ratio of [0.4, 0.78]) {
-    const z = ratio * 4.9;
-    const y = 4.57 - ratio * 1.7;
-    box(14.24, 0.055, 0.055, roofTrim, 0, y, z, roof, 0.012);
-    box(14.24, 0.055, 0.055, roofTrim, 0, y, -z, roof, 0.012);
-  }
-  const gableShape = new THREE.Shape();
-  gableShape.moveTo(-4.76, 0);
-  gableShape.lineTo(4.76, 0);
-  gableShape.lineTo(0, 1.68);
-  gableShape.closePath();
-  for (const x of [-6.865, 6.865]) {
-    const gable = mesh(
-      new THREE.ShapeGeometry(gableShape),
-      roofGlass,
-      x,
-      2.9,
-      0,
-      roof,
-      'villa-glass-gable',
-    );
-    gable.rotation.y = Math.PI / 2;
-    gable.userData.seasonWall = true;
-    gable.renderOrder = 4;
-  }
-  const chimney = group(4.75, 0, -1.55, 'villa-chimney', roof);
-  box(0.68, 1.35, 0.68, stuccoShade, 0, 4.12, 0, chimney, 0.05);
-  box(0.82, 0.15, 0.82, warmStone, 0, 4.8, 0, chimney, 0.04);
-  for (const x of [-0.2, 0.2]) box(0.13, 0.22, 0.13, roofTrim, x, 4.95, 0, chimney, 0.025);
+  const upper = createStudyVillaUpper();
+  estate.add(upper.group);
   const porch = group(0.96, 0, 5.08, 'villa-front-porch');
   box(3.25, 0.16, 1.05, warmStone, 0, -0.005, 0.12, porch, 0.07);
   box(2.85, 0.14, 0.7, stuccoShade, 0, -0.14, 0.72, porch, 0.06);
@@ -904,18 +876,6 @@ export function createStudyVillaExterior() {
   }
   for (let rung = 0; rung < 3; rung++)
     box(0.5, 0.045, 0.055, poolMetal, 0, 0.05 + rung * 0.2, 0.31, ladder, 0.015);
-  const loungerCushion = material(0xf0e4cf, 0.94);
-  const towelMaterial = material(0xd78672, 0.9);
-  for (const [index, z] of [-2.65, 2.65].entries()) {
-    const lounger = group(-3.15, 0.02, z, `villa-pool-lounger-${index + 1}`);
-    for (const legZ of [-0.62, 0.62])
-      box(0.86, 0.08, 0.07, poolMetal, 0, 0.085, legZ, lounger, 0.018);
-    box(1.0, 0.11, 1.8, loungerCushion, 0, 0.18, 0, lounger, 0.08);
-    const back = box(1.0, 0.11, 0.95, loungerCushion, 0, 0.5, -0.36, lounger, 0.07);
-    back.rotation.x = -0.52;
-    const towel = box(0.64, 0.035, 0.58, towelMaterial, 0, 0.255, 0.38, lounger, 0.035);
-    towel.rotation.y = index ? 0.05 : -0.04;
-  }
   const floatRing = group(0.74, 0.19, -0.42, 'villa-pool-float-ring', swimmingPool);
   floatRing.rotation.x = Math.PI / 2;
   const floatMaterials = [material(0xd97f69, 0.58), material(0xf4ddad, 0.62)];
@@ -934,6 +894,11 @@ export function createStudyVillaExterior() {
   let elapsed = 0;
   return {
     group: estate,
+    setFloorView(level: 'all' | 'first' | 'second' | 'roof') {
+      upper.second.visible = level !== 'first';
+      upper.rooftop.visible = level === 'all' || level === 'roof';
+      upper.stairs.visible = level !== 'first';
+    },
     animate(delta: number) {
       elapsed += Math.max(0, Math.min(delta, 0.1));
       for (const swimmer of swimmers) {
@@ -974,6 +939,7 @@ export function createStudyVillaExterior() {
       pondWater.opacity = 0.55 + Math.sin(elapsed * 0.7) * 0.035;
       poolWater.opacity = 0.68 + Math.sin(elapsed * 0.55) * 0.025;
       garage.animate(elapsed);
+      upper.animate(elapsed);
     },
   };
 }

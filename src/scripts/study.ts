@@ -267,6 +267,10 @@ async function buildRoom() {
     ['鱼池', 4.55, 0.45, 7.65],
     ['泳池', 9.62, 0.35, 0.15],
     ['车库', -9.6, 0.8, -0.7],
+    ['二楼 · KTV', -4.6, 4.0, 1.2],
+    ['二楼 · 私人影院', 0, 4.0, 1.2],
+    ['二楼 · 台球室', 4.6, 4.2, 1.2],
+    ['三楼 · 露天花园', 0, 6.7, 3.5],
   ] as const;
   const spaceMarkers = spaceLabels.map(([label, x, y, z]) => {
     const element = document.createElement('span');
@@ -337,6 +341,11 @@ async function buildRoom() {
   }
   followButton.addEventListener('click', () => {
     setFollowing(!following);
+    if (following) {
+      villa.setFloorView('first');
+      floorSelector.value = 'first';
+      renderer.shadowMap.needsUpdate = true;
+    }
     if (following && reduced.matches) {
       const target =
         character.getObjectByName('alei-head')?.getWorldPosition(new THREE.Vector3()) ??
@@ -425,6 +434,8 @@ async function buildRoom() {
   let playing = false;
   let frame = 0;
   let previous = 0;
+  const animationInterval = 1000 / 30;
+  let nextAnimationTime = 0;
   let disposed = false;
   function positionLabels() {
     const width = mount.clientWidth,
@@ -524,10 +535,13 @@ async function buildRoom() {
       previous = 0;
       return;
     }
-    if (previous && time - previous < 1000 / 30) {
+    if (previous && time < nextAnimationTime - 0.5) {
       frame = requestAnimationFrame(animate);
       return;
     }
+    // 使用计划时刻避免 60 Hz 的浮点误差让 30 FPS 实际落到 20–24 FPS。
+    nextAnimationTime += animationInterval;
+    if (nextAnimationTime <= time) nextAnimationTime = time + animationInterval;
     const delta = Math.min((time - (previous || time)) / 1000, 0.1);
     const chatting = talking();
     const simulationDelta = lifePaused || manipulating ? 0 : delta;
@@ -648,6 +662,7 @@ async function buildRoom() {
     cancelAnimationFrame(frame);
     frame = 0;
     previous = 0;
+    nextAnimationTime = 0;
     if (reduced.matches) {
       characterRig.setPetting(false);
       characterRig.animate(0, false, playing);
@@ -717,11 +732,32 @@ async function buildRoom() {
   mascotRoot.addEventListener('focusout', updateAnimation);
   function reset() {
     setFollowing(false);
-    camera.position.set(0.4, 16, 28).multiplyScalar(mount.clientWidth < 650 ? 1.25 : 1);
-    controls.target.set(0, 0.9, 1.05);
+    floorSelector.value = 'all';
+    villa.setFloorView('all');
+    camera.position
+      .set(1.5, 18, 32)
+      .multiplyScalar(Math.max(mount.clientWidth < 650 ? 1.25 : 1, 1.6 / camera.aspect));
+    controls.target.set(0, 3.0, 0.8);
+    renderer.shadowMap.needsUpdate = true;
     controls.update();
     render();
   }
+  const floorSelector = document.querySelector<HTMLSelectElement>('#room-floor')!;
+  floorSelector.addEventListener('change', () => {
+    setFollowing(false);
+    const level = floorSelector.value as 'all' | 'first' | 'second' | 'roof';
+    if (level === 'all') {
+      reset();
+      return;
+    }
+    villa.setFloorView(level);
+    const height = level === 'first' ? 0.9 : level === 'second' ? 4.4 : 6.7;
+    controls.target.set(0, height, 0);
+    camera.position.set(1.5, height + 13, 26).multiplyScalar(mount.clientWidth < 650 ? 1.2 : 1);
+    renderer.shadowMap.needsUpdate = true;
+    controls.update();
+    render();
+  });
   function resize() {
     const width = mount.clientWidth,
       height = mount.clientHeight;

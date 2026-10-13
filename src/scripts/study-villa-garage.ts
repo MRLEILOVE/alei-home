@@ -26,11 +26,12 @@ export function createStudyVillaGarage(): StudyVillaGarage {
   const steel = standard(0x8d9694, 0.35, { metalness: 0.72 });
   const darkSteel = standard(0x252b2c, 0.34, { metalness: 0.68 });
   const rubber = standard(0x171919, 0.9);
+  // 全景剖面使用透明度展示内部。避免 transmission 触发整座别墅的折射预渲染。
   const wallGlass = new THREE.MeshPhysicalMaterial({
     color: 0xdcebea,
     roughness: 0.12,
     metalness: 0.03,
-    transmission: 0.2,
+    transmission: 0,
     transparent: true,
     opacity: 0.19,
     depthWrite: false,
@@ -66,7 +67,7 @@ export function createStudyVillaGarage(): StudyVillaGarage {
     color: 0x283c43,
     roughness: 0.08,
     metalness: 0.05,
-    transmission: 0.25,
+    transmission: 0,
     transparent: true,
     opacity: 0.56,
     depthWrite: false,
@@ -78,7 +79,7 @@ export function createStudyVillaGarage(): StudyVillaGarage {
   const lampLens = new THREE.MeshPhysicalMaterial({
     color: 0xf7f0d8,
     roughness: 0.1,
-    transmission: 0.22,
+    transmission: 0,
     transparent: true,
     opacity: 0.88,
     emissive: 0xffe5ac,
@@ -402,7 +403,7 @@ export function createStudyVillaGarage(): StudyVillaGarage {
   );
   rearDeck.rotation.x = 0.045;
   for (const z of [-1.34, 1.34])
-    for (const x of [-0.72, 0.72]) {
+    for (const x of [-0.78, 0.78]) {
       const fender = mesh(
         new THREE.SphereGeometry(1, 28, 16),
         paintedRed,
@@ -412,7 +413,7 @@ export function createStudyVillaGarage(): StudyVillaGarage {
         0.62,
         z,
       );
-      fender.scale.set(0.38, 0.39, 0.66);
+      fender.scale.set(0.29, 0.39, 0.66);
     }
   for (const x of [-0.91, 0.91])
     box(0.13, 0.23, 2.82, paintedRed, body, 'porsche-side-skirt', x, 0.31, -0.02, 0.045);
@@ -457,33 +458,24 @@ export function createStudyVillaGarage(): StudyVillaGarage {
     0.34,
     0.01,
   );
-  for (const x of [-0.72, 0.72]) {
-    const pillar = box(
-      0.055,
-      0.055,
-      0.65,
-      charcoal,
+  // 用车窗顶点连接支柱，避免凭旋转角度估算导致四根窗框向车外突出。
+  for (const [startIndex, endIndex, name, material, radius] of [
+    [0, 2, 'porsche-a-pillar', paintedRed, 0.028],
+    [1, 3, 'porsche-a-pillar', paintedRed, 0.028],
+    [6, 4, 'porsche-c-pillar', paintedRed, 0.035],
+    [7, 5, 'porsche-c-pillar', paintedRed, 0.035],
+  ] as const) {
+    const start = new THREE.Vector3().fromArray(cabinVertices, startIndex * 3);
+    const end = new THREE.Vector3().fromArray(cabinVertices, endIndex * 3);
+    const direction = end.clone().sub(start);
+    const pillar = mesh(
+      new THREE.CylinderGeometry(radius, radius, direction.length(), 8),
+      material,
       greenhouse,
-      'porsche-a-pillar',
-      x,
-      1.18,
-      0.53,
-      0.01,
+      name,
     );
-    pillar.rotation.x = -0.65;
-    const rearPillar = box(
-      0.06,
-      0.06,
-      0.78,
-      paintedRed,
-      greenhouse,
-      'porsche-c-pillar',
-      x,
-      1.18,
-      -0.91,
-      0.012,
-    );
-    rearPillar.rotation.x = 0.73;
+    pillar.position.copy(start).add(end).multiplyScalar(0.5);
+    pillar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   }
 
   const interior = group(car, 'porsche-cockpit-interior');
@@ -550,14 +542,14 @@ export function createStudyVillaGarage(): StudyVillaGarage {
     { z: -1.38, label: 'rear' },
   ] as const)
     for (const side of [
-      { x: -0.94, label: 'left' },
-      { x: 0.94, label: 'right' },
+      { x: -1.02, label: 'left' },
+      { x: 1.02, label: 'right' },
     ] as const) {
       const wheel = group(
         wheels,
         `villa-porsche-wheel-${axle.label}-${side.label}`,
         side.x,
-        0.48,
+        0.395,
         axle.z,
       );
       const tire = mesh(
@@ -569,25 +561,34 @@ export function createStudyVillaGarage(): StudyVillaGarage {
       tire.rotation.y = Math.PI / 2;
       const rim = mesh(
         new THREE.CylinderGeometry(0.245, 0.245, 0.16, 28),
-        steel,
+        darkSteel,
         wheel,
         'porsche-alloy-rim',
       );
       rim.rotation.z = Math.PI / 2;
-      for (let spoke = 0; spoke < 10; spoke++) {
+      const rimLip = mesh(
+        new THREE.TorusGeometry(0.225, 0.018, 6, 24),
+        steel,
+        wheel,
+        'porsche-rim-lip',
+        side.x < 0 ? -0.09 : 0.09,
+      );
+      rimLip.rotation.y = Math.PI / 2;
+      for (let spoke = 0; spoke < 5; spoke++) {
+        const angle = (spoke / 5) * Math.PI * 2;
         const spokeMesh = box(
           0.035,
-          0.21,
-          0.025,
-          darkSteel,
+          0.2,
+          0.045,
+          steel,
           wheel,
           'porsche-rim-spoke',
           side.x < 0 ? -0.092 : 0.092,
-          0,
-          0,
+          Math.cos(angle) * 0.115,
+          Math.sin(angle) * 0.115,
           0.006,
         );
-        spokeMesh.rotation.x = (spoke / 10) * Math.PI * 2;
+        spokeMesh.rotation.x = angle;
       }
       const brakeDisc = mesh(
         new THREE.CylinderGeometry(0.17, 0.17, 0.012, 24),
@@ -625,7 +626,7 @@ export function createStudyVillaGarage(): StudyVillaGarage {
       'porsche-oval-headlamp',
       x,
       0.82,
-      1.93,
+      2.16,
     );
     lamp.scale.set(0.235, 0.18, 0.055);
     const indicator = box(

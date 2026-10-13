@@ -85,14 +85,14 @@ const destinations = [
         过成喜欢的样子。
       </h1>
       <p>
-        一座小别墅，一整个庭院。
+        三层小楼，一整个庭院。
         <br />
-        看小阿雷与猫，在花园和水边过一天。
+        楼下烟火，楼上欢聚，屋顶花开。
       </p>
     </div>
     <section
       id="room-stage"
-      aria-label="可环绕查看的半透明全景小别墅，包含卧室、客厅、厨房、卫生间、小花园、鱼池、游泳池和半透明车库。车库里停着一辆红色保时捷跑车，花园里种着鲜花，鱼池里有小鱼和乌龟，别墅门口有两座大石狮子。小阿雷按一天的作息生活，狸花猫自由活动并回窝睡觉。"
+      aria-label="半透明三层小别墅：一楼保留卧室、客厅、厨房与卫生间；二楼设有 KTV、私人影院和台球室；三楼为插着中国五星红旗的露天花园。楼后楼梯连接各层，庭院四周围有栅栏，保留车行和入户通道。院内有花园、鱼池、乌龟、小鱼、泳池、双石狮以及停着红色保时捷的半透明车库。"
       data-landscape={landscape.src}
       data-journal={journal.src}
       data-book-covers={JSON.stringify(bookCovers)}
@@ -125,6 +125,12 @@ const destinations = [
       <small>跟随你所在地的时间，过好每一刻。</small>
     </aside>
     <div class="room-tools">
+      <select id="room-floor" aria-label="查看楼层">
+        <option value="all">整栋全景</option>
+        <option value="first">一楼 · 生活空间</option>
+        <option value="second">二楼 · 娱乐空间</option>
+        <option value="roof">三楼 · 露天花园</option>
+      </select>
       <button id="room-reset" type="button">
         ↺ 回到全景
       </button>

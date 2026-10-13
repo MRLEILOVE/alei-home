@@ -241,6 +241,18 @@
 #room-labels:hover {
   color: var(--accent);
 }
+#room-floor {
+  max-width: 145px;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  background: var(--paper, #f5eddb);
+  font: 11px/1.8 var(--serif);
+}
+.room-tools {
+  flex-wrap: wrap;
+}
 .room-life-controls > span {
   align-self: center;
   font: 11px/1.8 var(--serif);

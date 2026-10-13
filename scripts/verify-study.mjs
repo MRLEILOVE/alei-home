@@ -128,13 +128,45 @@ home.group.traverse((item) =>
   ),
 );
 const villa = createStudyVillaExterior();
+villa.group.traverse((item) => {
+  assert(!item.name.startsWith('villa-pool-lounger'), '一楼仍残留躺椅');
+  if (item.name === 'porsche-a-pillar' || item.name === 'porsche-c-pillar') {
+    const halfLength = item.geometry.parameters.height / 2;
+    const low = new THREE.Vector3(0, -halfLength, 0)
+      .applyQuaternion(item.quaternion)
+      .add(item.position);
+    const high = new THREE.Vector3(0, halfLength, 0)
+      .applyQuaternion(item.quaternion)
+      .add(item.position);
+    assert(Math.abs(low.y - 0.92) < 1e-6 && Math.abs(high.y - 1.43) < 1e-6, '车窗支柱高度偏离玻璃');
+    assert(Math.abs(high.x) < Math.abs(low.x), '车窗支柱向外突出');
+    assert(
+      item.name === 'porsche-a-pillar' ? high.z < low.z : high.z > low.z,
+      '车窗支柱倾斜方向错误',
+    );
+  }
+});
+for (const index of [1, 2]) {
+  const chair = villa.group.getObjectByName(`villa-rooftop-lounger-${index}`);
+  assert(chair?.getObjectByName('villa-lounger-head-pillow'), '三楼躺椅缺少头枕');
+  assert(
+    chair.getObjectByName('villa-lounger-raised-backrest').rotation.x > 0,
+    '三楼躺椅靠背未抬起',
+  );
+}
 for (const structure of [
   'villa-transparent-shell',
-  'villa-pitched-roof',
+  'villa-second-floor',
+  'villa-ktv-room',
+  'villa-private-cinema',
+  'villa-billiards-room',
+  'villa-rooftop-garden',
+  'villa-china-flag',
+  'villa-exterior-staircase',
+  'villa-perimeter-fence',
   'villa-front-door',
   'villa-stone-terrace',
   'villa-facade-plinth',
-  'villa-chimney',
   'villa-porch-gable',
   'villa-porch-lantern',
   'villa-lawn-details',
@@ -166,6 +198,23 @@ for (const structure of [
 ])
   assert(villa.group.getObjectByName(structure), `小别墅缺少完整构造：${structure}`);
 const villaBounds = new THREE.Box3().setFromObject(villa.group);
+const secondFloor = villa.group.getObjectByName('villa-second-floor');
+const roofGarden = villa.group.getObjectByName('villa-rooftop-garden');
+assert(secondFloor.position.y > 3 && roofGarden.position.y > 6, '楼层高度未形成三层小楼');
+const flag = villa.group.getObjectByName('villa-china-flag');
+assert.equal(
+  flag.children.filter((item) => item.name === 'villa-flag-star').length,
+  5,
+  '中国国旗应有五颗星',
+);
+const flagCloth = villa.group.getObjectByName('villa-flag-cloth');
+const initialFlag = [...flagCloth.geometry.attributes.position.array];
+villa.setFloorView('first');
+assert(!secondFloor.visible && !roofGarden.visible, '查看一楼时上层没有移开');
+villa.setFloorView('second');
+assert(secondFloor.visible && !roofGarden.visible, '查看二楼时花园遮挡娱乐空间');
+villa.setFloorView('all');
+assert(secondFloor.visible && roofGarden.visible, '全景未恢复全部楼层');
 const villaSize = villaBounds.getSize(new THREE.Vector3());
 assert(
   villaSize.x >= 24 && villaSize.y >= 4.5 && villaSize.z >= 18,
@@ -173,7 +222,6 @@ assert(
 );
 for (const detail of [
   'villa-stone-terrace',
-  'villa-chimney',
   'villa-porch-gable',
   'villa-lawn-details',
   'villa-perimeter-hedge',
@@ -218,6 +266,13 @@ assert(
   '小别墅外墙或屋顶不是半透明材质',
 );
 const garage = villa.group.getObjectByName('villa-garage');
+garage.traverse((item) => {
+  if (!(item instanceof THREE.Mesh)) return;
+  const materials = Array.isArray(item.material) ? item.material : [item.material];
+  for (const material of materials)
+    if (material instanceof THREE.MeshPhysicalMaterial)
+      assert.equal(material.transmission, 0, '全景车库材质不应触发昂贵的整场景折射预渲染');
+});
 const garageShell = villa.group.getObjectByName('villa-garage-transparent-shell');
 const garageDriveway = villa.group.getObjectByName('villa-garage-driveway');
 const porsche = villa.group.getObjectByName('villa-porsche-sports-car');
@@ -358,6 +413,10 @@ const poolRipplePosition = poolRipple.position.clone();
 const floatRing = villa.group.getObjectByName('villa-pool-float-ring');
 const floatRingPosition = floatRing.position.clone();
 for (let frame = 0; frame < 120; frame++) villa.animate(1 / 30);
+assert(
+  flagCloth.geometry.attributes.position.array.some((v, i) => v !== initialFlag[i]),
+  '旗帜没有飘动',
+);
 assert(pondFish.position.distanceTo(fishStart) > 0.1, '鱼池里的小鱼没有游动');
 assert(pondTurtle.position.distanceTo(turtleStart) > 0.1, '鱼池里的乌龟没有游动');
 assert(
