@@ -202,6 +202,12 @@ const secondFloor = villa.group.getObjectByName('villa-second-floor');
 const roofGarden = villa.group.getObjectByName('villa-rooftop-garden');
 assert(secondFloor.position.y > 3 && roofGarden.position.y > 6, '楼层高度未形成三层小楼');
 const flag = villa.group.getObjectByName('villa-china-flag');
+flag.traverse((item) => {
+  if (!item.name.startsWith('villa-flag-')) return;
+  assert.equal(item.castShadow, false, '旗面不应投射阴影');
+  assert.equal(item.receiveShadow, false, '旗面不应接收阴影');
+  assert(item.material instanceof THREE.MeshBasicMaterial, '旗面不应产生光照明暗');
+});
 assert.equal(
   flag.children.filter((item) => item.name === 'villa-flag-star').length,
   5,
@@ -548,6 +554,8 @@ console.log(
   `小别墅验证通过：半透明全景、花园、鱼池、泳池、双石狮、${meshes} 个人物部件、${catMeshes} 个狸花猫部件、软垫猫窝与蜷睡闭眼/醒来动作、${layout.edges.length} 条避障连接、36000 帧随机行走、交互暂停与恢复。`,
 );
 await import('./verify-study-labels.mjs');
+await import('./verify-study-stairs.mjs');
+await import('./verify-study-fish.mjs');
 await import('./verify-real-time.mjs');
 await import('./verify-cat-behavior.mjs');
 await import('./verify-daily-life.mjs');

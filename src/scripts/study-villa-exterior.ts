@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createStudyVillaGarage } from './study-villa-garage.ts';
 import { createStudyVillaUpper } from './study-villa-upper.ts';
+import { createStudyPoolPeople } from './study-pool-people.ts';
 
 type Swimmer = {
   object: THREE.Group;
@@ -43,7 +44,6 @@ export function createStudyVillaExterior() {
   const stuccoShade = material(0xd4c9b5, 0.95);
   const gravel = material(0xb7a98f, 1);
   const wood = material(0x75543b, 0.82);
-  const windowTrim = material(0x9b7a5b, 0.8);
   const roofTrim = material(0x71645a, 0.72);
   const darkDetail = material(0x454842, 0.7);
   const bronze = material(0xa28755, 0.4, { metalness: 0.58 });
@@ -258,7 +258,7 @@ export function createStudyVillaExterior() {
     box(0.46, 0.016, 7.85, lawnShade, x, 0.041, 0, driveway, 0.02, 'villa-driveway-wheel-band');
   const garage = createStudyVillaGarage();
   estate.add(garage.group);
-  for (const sectionName of ['villa-garage-transparent-shell', 'garage-sectional-glass-door']) {
+  for (const sectionName of ['villa-garage-transparent-shell']) {
     garage.group.getObjectByName(sectionName)?.traverse((item) => {
       if (!(item instanceof THREE.Mesh)) return;
       const materials = Array.isArray(item.material) ? item.material : [item.material];
@@ -304,7 +304,7 @@ export function createStudyVillaExterior() {
     box(0.018, 0.006, 0.56, gravel, seam * 1.05, 0.038, 5.02, terrace, 0.002);
     box(0.018, 0.006, 0.56, gravel, seam * 1.05, 0.038, -5.02, terrace, 0.002);
   }
-  // 半高实墙、浅色柱和细木窗格让透明剖面更像建筑，而不是玻璃展示盒。
+  // 保留浅色墙裙与必要梁柱，墙面采用无木质装饰格栅的通透玻璃。
   box(5.92, 0.42, 0.15, stucco, -3.91, 0.21, 4.74, shell, 0.025, 'villa-facade-plinth');
   box(4.04, 0.42, 0.15, stucco, 4.85, 0.21, 4.74, shell, 0.025);
   box(13.72, 0.42, 0.15, stuccoShade, 0, 0.21, -4.74, shell, 0.025);
@@ -318,16 +318,6 @@ export function createStudyVillaExterior() {
     }
   for (const z of [-4.77, 4.77]) box(13.9, 0.16, 0.16, stuccoShade, 0, 2.9, z, shell, 0.025);
   for (const x of [-6.88, 6.88]) box(0.16, 0.16, 9.55, stuccoShade, x, 2.9, 0, shell, 0.025);
-  for (const x of [-5.35, -3.88, -2.42, 3.62, 5.02, 6.25])
-    box(0.052, 2.2, 0.07, windowTrim, x, 1.55, 4.79, shell, 0.01);
-  for (const x of [-3.9, 4.85]) {
-    box(x < 0 ? 5.75 : 3.86, 0.052, 0.07, windowTrim, x, 1.14, 4.79, shell, 0.01);
-    box(x < 0 ? 5.75 : 3.86, 0.052, 0.07, windowTrim, x, 2.13, 4.79, shell, 0.01);
-  }
-  for (const z of [-3.45, -1.72, 0, 1.72, 3.45])
-    box(0.07, 2.2, 0.052, windowTrim, 6.9, 1.55, z, shell, 0.01);
-  for (const z of [-2.55, 0.85, 3.55])
-    box(0.07, 0.052, 2.95, windowTrim, 6.9, 1.55, z, shell, 0.01);
   const frontDoor = group(0.96, 0.05, 4.79, 'villa-front-door', shell);
   for (const x of [-0.93, 0, 0.93]) box(0.1, 2.3, 0.11, wood, x, 1.15, 0, frontDoor, 0.018);
   box(1.95, 0.11, 0.11, wood, 0, 2.3, 0, frontDoor, 0.018);
@@ -384,70 +374,153 @@ export function createStudyVillaExterior() {
     tile.rotation.y = Math.sin(step * 1.2) * 0.025;
   }
 
+  // 参考传统汉白玉门狮：蹲踞、直立前腿、阔口卷鬃、雄狮绣球与雌狮幼狮。
+  const lionStone = material(0xdedbd1, 0.94);
+  const lionRelief = material(0xc4c0b5, 0.96);
+  const lionRecess = material(0x79786f, 1);
+  const maneGeometry = new THREE.TorusGeometry(0.052, 0.021, 7, 16, Math.PI * 1.85);
   function stoneLion(x: number, z: number, name: string, pawSide: -1 | 1) {
     const lion = group(x, 0.03, z, name);
-    box(0.9, 0.2, 0.76, stoneDark, 0, 0.1, 0, lion, 0.055);
-    box(0.78, 0.15, 0.66, warmStone, 0, 0.275, 0, lion, 0.05);
-    box(0.66, 0.08, 0.55, stone, 0, 0.39, 0.02, lion, 0.035);
-    sphere(0.36, 0.5, 0.34, stone, 0, 0.79, -0.07, lion);
+    box(0.94, 0.13, 0.85, lionRelief, 0, 0.065, 0, lion, 0.025);
+    box(0.78, 0.23, 0.7, lionStone, 0, 0.235, 0, lion, 0.025);
+    box(0.93, 0.09, 0.82, lionStone, 0, 0.395, 0, lion, 0.025);
     for (const side of [-1, 1]) {
-      sphere(0.22, 0.31, 0.22, stone, side * 0.26, 0.62, -0.09, lion);
-      sphere(0.13, 0.31, 0.14, warmStone, side * 0.23, 0.55, 0.24, lion);
-      sphere(0.17, 0.1, 0.2, stone, side * 0.23, 0.34, 0.39, lion);
-      for (let claw = -1; claw <= 1; claw++)
-        box(0.035, 0.025, 0.1, stoneDark, side * 0.23 + claw * 0.04, 0.42, 0.52, lion, 0.008);
+      box(0.025, 0.14, 0.51, lionRelief, side * 0.395, 0.24, 0, lion, 0.008);
+      for (let petal = 0; petal < 5; petal++) {
+        const a = (petal * Math.PI * 2) / 5;
+        sphere(
+          0.045,
+          0.04,
+          0.016,
+          lionStone,
+          side * 0.21 + Math.cos(a) * 0.045,
+          0.24 + Math.sin(a) * 0.045,
+          0.356,
+          lion,
+        );
+      }
     }
-    sphere(0.46, 0.45, 0.4, stoneDark, 0, 1.25, 0.05, lion);
-    sphere(0.33, 0.32, 0.3, stone, 0, 1.27, 0.22, lion);
-    sphere(0.22, 0.14, 0.2, warmStone, 0, 1.17, 0.47, lion);
+    // 后臀收拢、胸部抬高，腿与脚落在石台上。
+    sphere(0.29, 0.34, 0.29, lionStone, 0, 0.75, -0.12, lion);
+    sphere(0.28, 0.4, 0.24, lionStone, 0, 1.0, 0.04, lion);
     for (const side of [-1, 1]) {
-      const ear = mesh(new THREE.ConeGeometry(0.12, 0.24, 4), stone, side * 0.24, 1.61, 0.14, lion);
-      ear.rotation.z = side * -0.18;
-      sphere(0.064, 0.045, 0.035, darkDetail, side * 0.12, 1.33, 0.49, lion);
-      const brow = box(0.15, 0.035, 0.045, stoneDark, side * 0.12, 1.41, 0.47, lion, 0.009);
-      brow.rotation.z = side * -0.18;
-    }
-    sphere(0.075, 0.055, 0.06, stoneDark, 0, 1.22, 0.64, lion);
-    box(0.2, 0.025, 0.025, stoneDark, 0, 1.1, 0.64, lion, 0.008);
-    for (const toothX of [-0.07, 0.07]) {
-      const tooth = mesh(
-        new THREE.ConeGeometry(0.025, 0.09, 5),
-        warmStone,
-        toothX,
-        1.055,
-        0.65,
-        lion,
-      );
-      tooth.rotation.z = Math.PI;
-    }
-    for (let curl = 0; curl < 14; curl++) {
-      const angle = (curl / 14) * Math.PI * 2;
+      sphere(0.19, 0.22, 0.24, lionStone, side * 0.22, 0.65, -0.13, lion);
+      const raised = side === pawSide;
       sphere(
-        0.085 + (curl % 2) * 0.018,
-        0.085,
-        0.075,
-        curl % 2 ? stone : warmStone,
-        Math.cos(angle) * 0.39,
-        1.26 + Math.sin(angle) * 0.4,
-        0.01,
+        0.105,
+        raised ? 0.25 : 0.33,
+        0.105,
+        lionStone,
+        side * 0.22,
+        raised ? 0.93 : 0.83,
+        0.24,
         lion,
       );
+      sphere(0.14, 0.085, 0.16, lionStone, side * 0.22, raised ? 0.7 : 0.505, 0.34, lion);
+      for (let toe = -1; toe <= 1; toe++)
+        sphere(
+          0.036,
+          0.04,
+          0.06,
+          lionRelief,
+          side * 0.22 + toe * 0.065,
+          raised ? 0.685 : 0.49,
+          0.46,
+          lion,
+        );
     }
-    sphere(0.2, 0.2, 0.2, stoneDark, pawSide * 0.28, 0.49, 0.47, lion);
-    for (let band = 0; band < 4; band++) {
-      const ring = mesh(
-        new THREE.TorusGeometry(0.12 + band * 0.015, 0.018, 6, 18),
-        stone,
-        0,
-        0,
-        0,
+    sphere(0.37, 0.36, 0.31, lionRelief, 0, 1.38, 0.02, lion);
+    box(0.49, 0.32, 0.33, lionStone, 0, 1.42, 0.22, lion, 0.12, 'villa-lion-broad-face');
+    sphere(0.23, 0.13, 0.13, lionRecess, 0, 1.25, 0.405, lion).name = 'villa-lion-open-mouth';
+    sphere(0.23, 0.065, 0.13, lionStone, 0, 1.14, 0.41, lion);
+    for (const side of [-1, 1]) {
+      sphere(0.09, 0.11, 0.055, lionStone, side * 0.29, 1.62, 0.12, lion);
+      sphere(0.05, 0.066, 0.018, lionRelief, side * 0.29, 1.63, 0.165, lion);
+      sphere(0.1, 0.066, 0.04, lionRelief, side * 0.13, 1.47, 0.397, lion);
+      sphere(0.046, 0.038, 0.033, lionStone, side * 0.13, 1.475, 0.428, lion);
+      sphere(0.015, 0.018, 0.009, lionRecess, side * 0.13, 1.475, 0.457, lion);
+      const brow = sphere(0.12, 0.043, 0.055, lionStone, side * 0.13, 1.54, 0.4, lion);
+      brow.rotation.z = side * 0.22;
+      sphere(0.12, 0.087, 0.105, lionStone, side * 0.11, 1.34, 0.43, lion);
+      const fang = mesh(
+        new THREE.ConeGeometry(0.024, 0.085, 8),
+        lionStone,
+        side * 0.13,
+        1.26,
+        0.514,
         lion,
       );
-      ring.position.set(-pawSide * 0.3, 0.65 + band * 0.065, -0.28 + band * 0.03);
-      ring.rotation.x = Math.PI / 2;
-      ring.rotation.y = pawSide * 0.5;
+      fang.rotation.z = Math.PI;
     }
-    sphere(0.12, 0.12, 0.12, stoneDark, -pawSide * 0.42, 0.88, -0.2, lion);
+    box(0.15, 0.075, 0.075, lionRelief, 0, 1.39, 0.524, lion, 0.028);
+    for (const side of [-1, 1])
+      sphere(0.022, 0.013, 0.009, lionRecess, side * 0.044, 1.377, 0.562, lion);
+    // 鬃毛沿头部侧面包围，而不是只贴一圈圆球；实例绘制降低开销。
+    const mane = new THREE.InstancedMesh(maneGeometry, lionStone, 36);
+    mane.name = 'villa-lion-carved-mane';
+    const pose = new THREE.Object3D();
+    for (let i = 0; i < 36; i++) {
+      const row = Math.floor(i / 12),
+        angle = ((i % 12) / 12) * Math.PI * 2;
+      pose.position.set(
+        Math.cos(angle) * (0.32 + row * 0.025),
+        1.39 + Math.sin(angle) * 0.32,
+        0.2 - row * 0.15,
+      );
+      const normal = new THREE.Vector3(
+        Math.cos(angle),
+        Math.sin(angle),
+        row === 0 ? 1 : 0.2,
+      ).normalize();
+      pose.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+      pose.rotateZ(angle * 1.8);
+      pose.updateMatrix();
+      mane.setMatrixAt(i, pose.matrix);
+    }
+    lion.add(mane);
+    const collar = mesh(
+      new THREE.TorusGeometry(0.235, 0.024, 6, 24),
+      lionRelief,
+      0,
+      1.11,
+      0.08,
+      lion,
+      'villa-lion-collar',
+    );
+    collar.rotation.x = Math.PI / 2;
+    sphere(0.064, 0.075, 0.042, lionRelief, 0, 1.01, 0.315, lion);
+    if (pawSide < 0) {
+      const ball = group(pawSide * 0.22, 0.565, 0.36, 'villa-lion-embroidered-ball', lion);
+      sphere(0.145, 0.145, 0.145, lionRelief, 0, 0, 0, ball);
+      for (let i = 0; i < 3; i++) {
+        const band = mesh(new THREE.TorusGeometry(0.145, 0.012, 5, 20), lionStone, 0, 0, 0, ball);
+        band.rotation.set(i === 0 ? Math.PI / 2 : 0, i === 1 ? Math.PI / 2 : 0, 0);
+      }
+    } else {
+      const cub = group(pawSide * 0.22, 0.52, 0.35, 'villa-lion-cub', lion);
+      sphere(0.12, 0.08, 0.17, lionStone, 0, 0, 0, cub);
+      sphere(0.085, 0.08, 0.075, lionStone, 0, 0.045, 0.13, cub);
+      for (const side of [-1, 1]) {
+        sphere(0.032, 0.035, 0.03, lionRelief, side * 0.061, 0.104, 0.13, cub);
+        sphere(0.009, 0.01, 0.008, lionRecess, side * 0.034, 0.057, 0.196, cub);
+      }
+    }
+    const tailCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.2, 0.6, -0.3),
+      new THREE.Vector3(0.34, 0.77, -0.31),
+      new THREE.Vector3(0.32, 0.98, -0.25),
+      new THREE.Vector3(0.21, 1.04, -0.23),
+    ]);
+    mesh(
+      new THREE.TubeGeometry(tailCurve, 16, 0.045, 7, false),
+      lionStone,
+      0,
+      0,
+      0,
+      lion,
+      'villa-lion-curled-tail',
+    );
+    sphere(0.075, 0.085, 0.07, lionRelief, 0.21, 1.04, -0.23, lion);
     lion.scale.setScalar(1.04);
     return lion;
   }
@@ -517,6 +590,20 @@ export function createStudyVillaExterior() {
       ).rotation.y = angle;
     }
     sphere(0.055, 0.04, 0.055, flowerColors[1], x, 0.17 + height, z, flowerGarden);
+    // 花心上方的小花蕊与错层叶片，避免所有花都像平面圆片。
+    sphere(0.024, 0.032, 0.024, bronze, x, 0.208 + height, z, flowerGarden);
+    const upperLeaf = sphere(
+      0.045,
+      0.014,
+      0.12,
+      foliage,
+      x - 0.055,
+      0.3 + height * 0.24,
+      z,
+      flowerGarden,
+    );
+    upperLeaf.rotation.z = -0.45;
+    upperLeaf.rotation.y = index * 1.7;
   }
   for (const [x, z, scale] of [
     [-2.0, -1.38, 0.86],
@@ -553,6 +640,48 @@ export function createStudyVillaExterior() {
 
   // 鱼池位于主路右侧，透明水面下可看到游动的小鱼和乌龟。
   const fishPond = group(4.55, -0.015, 7.65, 'villa-fish-pond');
+  // 批量绘制岸边碎石与苔藓：增加细节只增加两个绘制批次。
+  const shoreMatrix = new THREE.Object3D();
+  for (const moss of [false, true]) {
+    const shore = new THREE.InstancedMesh(
+      new THREE.IcosahedronGeometry(1, 1),
+      moss ? foliageShadow : gravel,
+      64,
+    );
+    shore.name = moss ? 'villa-pond-shore-moss' : 'villa-pond-shore-gravel';
+    for (let i = 0; i < 64; i++) {
+      const angle = i * 2.399;
+      const radius = 1 + Math.sin(i * 4.7) * 0.045;
+      shoreMatrix.position.set(
+        Math.cos(angle) * 2.28 * radius,
+        moss ? 0.085 : 0.04,
+        Math.sin(angle) * 1.29 * radius,
+      );
+      const size = 0.045 + (i % 5) * 0.011;
+      shoreMatrix.scale.set(size * (moss ? 1.5 : 1), size * 0.4, size);
+      shoreMatrix.rotation.set(i * 0.3, i * 1.7, 0);
+      shoreMatrix.updateMatrix();
+      shore.setMatrixAt(i, shoreMatrix.matrix);
+    }
+    fishPond.add(shore);
+  }
+  const lotus = group(-1.1, 0.12, -0.55, 'villa-pond-lotus', fishPond);
+  for (let layer = 0; layer < 2; layer++)
+    for (let petal = 0; petal < 7; petal++) {
+      const a = (petal * Math.PI * 2) / 7 + layer * 0.4;
+      const leaf = sphere(
+        0.055,
+        0.035 + layer * 0.025,
+        0.13 - layer * 0.025,
+        flowerColors[layer ? 0 : 2],
+        Math.sin(a) * 0.08,
+        layer * 0.045,
+        Math.cos(a) * 0.08,
+        lotus,
+      );
+      leaf.rotation.y = a;
+    }
+  sphere(0.05, 0.045, 0.05, flowerColors[1], 0, 0.09, 0, lotus);
   const pondFloorMaterial = material(0x40574c, 0.92);
   const pondPebbleMaterial = material(0x9f957c, 0.96);
   const pondRippleMaterial = new THREE.MeshBasicMaterial({
@@ -722,27 +851,69 @@ export function createStudyVillaExterior() {
   const swimmers: Swimmer[] = [];
   function pondFish(index: number, phase: number, radiusX: number, radiusZ: number, speed: number) {
     const fish = group(0, 0, 0, `villa-pond-fish-${index + 1}`, fishPond);
-    sphere(0.13, 0.065, 0.28, fishMaterials[index % fishMaterials.length], 0, 0, 0, fish);
-    sphere(0.09, 0.055, 0.1, fishMaterials[index % fishMaterials.length], 0, 0, 0.22, fish);
+    sphere(0.075, 0.105, 0.28, fishMaterials[index % fishMaterials.length], 0, 0, 0, fish).name =
+      'villa-fish-body';
+    sphere(0.066, 0.08, 0.1, fishMaterials[index % fishMaterials.length], 0, 0, 0.22, fish);
     for (const side of [-1, 1]) {
-      const fin = sphere(0.075, 0.016, 0.12, fishFinMaterial, side * 0.105, -0.005, -0.015, fish);
+      const fin = sphere(0.055, 0.012, 0.09, fishFinMaterial, side * 0.075, -0.035, 0.06, fish);
       fin.rotation.z = side * 0.32;
       fin.rotation.y = side * 0.2;
     }
-    const tail = mesh(
-      new THREE.ConeGeometry(0.13, 0.22, 4),
+    // 独立尾根只绕 Y 轴摆动，造型旋转放在子网格上，避免传给尾鳍。
+    const tail = group(0, 0, -0.235, 'villa-fish-tail-root', fish);
+    const tailStem = mesh(
+      new THREE.CylinderGeometry(0.055, 0.026, 0.12, 12),
       fishMaterials[index % fishMaterials.length],
       0,
       0,
-      -0.31,
-      fish,
+      -0.045,
+      tail,
+      'villa-fish-tail-stem',
     );
-    tail.rotation.x = Math.PI / 2;
-    tail.rotation.z = Math.PI / 4;
+    tailStem.rotation.x = Math.PI / 2;
+    tailStem.scale.x = 0.65;
     fish.userData.tail = tail;
+    // 锦鲤色斑与细鳞共用一个实例网格，随鱼整体移动。
+    const scales = new THREE.InstancedMesh(
+      new THREE.SphereGeometry(1, 8, 5),
+      fishMaterials[(index + 1) % 3],
+      18,
+    );
+    scales.name = 'villa-fish-scale-pattern';
+    const scalePose = new THREE.Object3D();
+    for (let i = 0; i < 18; i++) {
+      const z = -0.18 + Math.floor(i / 3) * 0.068;
+      const x = ((i % 3) - 1) * 0.03;
+      const y = 0.105 * Math.sqrt(Math.max(0, 1 - (x / 0.075) ** 2 - (z / 0.28) ** 2));
+      scalePose.position.set(x, y, z);
+      scalePose.scale.set(0.018, 0.005, 0.035);
+      scalePose.updateMatrix();
+      scales.setMatrixAt(i, scalePose.matrix);
+    }
+    fish.add(scales);
+    sphere(0.009, 0.045, 0.13, fishFinMaterial, 0, 0.098, -0.035, fish).name =
+      'villa-fish-dorsal-fin';
+    for (const side of [-1, 1]) {
+      sphere(0.023, 0.02, 0.019, warmStone, side * 0.073, 0.034, 0.232, fish);
+      sphere(0.006, 0.006, 0.006, warmLight, side * 0.078, 0.048, 0.245, fish);
+      // 鱼尾为竖直尾鳍，上下分叶，整个尾根仍沿水平方向左右摆动。
+      const lobe = sphere(0.014, 0.058, 0.105, fishFinMaterial, 0, side * 0.055, -0.15, tail);
+      lobe.name = side < 0 ? 'villa-fish-tail-bottom' : 'villa-fish-tail-top';
+      lobe.rotation.x = side * 0.45;
+    }
+    const mouth = mesh(
+      new THREE.TorusGeometry(0.022, 0.006, 5, 12),
+      fishMaterials[index % 3],
+      0,
+      0,
+      0.316,
+      fish,
+      'villa-fish-mouth',
+    );
+    mouth.scale.y = 0.65;
     sphere(0.016, 0.018, 0.012, darkDetail, -0.07, 0.035, 0.23, fish);
     sphere(0.016, 0.018, 0.012, darkDetail, 0.07, 0.035, 0.23, fish);
-    swimmers.push({ object: fish, radiusX, radiusZ, speed, phase, height: 0.095 + index * 0.012 });
+    swimmers.push({ object: fish, radiusX, radiusZ, speed, phase, height: 0.135 + index * 0.004 });
   }
   pondFish(0, 0, 1.45, 0.72, 0.65);
   pondFish(1, 2.3, 1.12, 0.88, -0.48);
@@ -765,16 +936,46 @@ export function createStudyVillaExterior() {
       new THREE.CylinderGeometry(0.072, 0.082, 0.018, 6),
       turtleShellDetail,
       x,
-      0.151,
+      0.075 + 0.07 * Math.sqrt(Math.max(0, 1 - (x / 0.22) ** 2 - (z / 0.28) ** 2)),
       z,
       turtle,
     );
     shellPlate.rotation.y = Math.PI / 6;
   }
+  const shellRim = mesh(
+    new THREE.TorusGeometry(1, 0.035, 6, 28),
+    turtleShellDetail,
+    0,
+    0.015,
+    0,
+    turtle,
+    'villa-turtle-shell-rim',
+  );
+  shellRim.rotation.x = Math.PI / 2;
+  shellRim.scale.set(0.285, 0.355, 0.6);
+  for (const side of [-1, 1]) {
+    sphere(0.026, 0.023, 0.022, warmStone, side * 0.067, 0.044, 0.465, turtle);
+    sphere(0.012, 0.014, 0.013, darkDetail, side * 0.074, 0.049, 0.481, turtle);
+    sphere(0.026, 0.009, 0.06, turtleShellDetail, side * 0.089, 0.016, 0.413, turtle);
+    sphere(0.006, 0.006, 0.007, darkDetail, side * 0.025, 0.025, 0.524, turtle);
+  }
+  const turtleLegs: Array<{ mesh: THREE.Mesh; base: number; phase: number }> = [];
   for (const x of [-0.23, 0.23])
     for (const z of [-0.24, 0.24]) {
       const leg = sphere(0.09, 0.035, 0.12, foliageLight, x, -0.025, z, turtle);
       leg.rotation.y = x * z * 3;
+      turtleLegs.push({ mesh: leg, base: leg.rotation.y, phase: x * z > 0 ? 0 : Math.PI });
+      for (let toe = -1; toe <= 1; toe++)
+        sphere(
+          0.012,
+          0.012,
+          0.038,
+          warmStone,
+          x + toe * 0.025,
+          -0.025,
+          z + Math.sign(z) * 0.095,
+          turtle,
+        );
     }
   sphere(0.04, 0.025, 0.08, foliageLight, 0, -0.015, -0.39, turtle);
 
@@ -876,7 +1077,7 @@ export function createStudyVillaExterior() {
   }
   for (let rung = 0; rung < 3; rung++)
     box(0.5, 0.045, 0.055, poolMetal, 0, 0.05 + rung * 0.2, 0.31, ladder, 0.015);
-  const floatRing = group(0.74, 0.19, -0.42, 'villa-pool-float-ring', swimmingPool);
+  const floatRing = group(-0.9, 0.19, 2.8, 'villa-pool-float-ring', swimmingPool);
   floatRing.rotation.x = Math.PI / 2;
   const floatMaterials = [material(0xd97f69, 0.58), material(0xf4ddad, 0.62)];
   for (let segment = 0; segment < 8; segment++) {
@@ -891,6 +1092,8 @@ export function createStudyVillaExterior() {
     ringSegment.rotation.z = segment * (Math.PI / 4);
   }
 
+  const poolPeople = createStudyPoolPeople();
+  swimmingPool.add(poolPeople.group);
   let elapsed = 0;
   return {
     group: estate,
@@ -919,6 +1122,8 @@ export function createStudyVillaExterior() {
         Math.sin(turtleAngle) * 0.42,
       );
       turtle.rotation.y = turtleAngle + Math.PI / 2;
+      for (const leg of turtleLegs)
+        leg.mesh.rotation.y = leg.base + Math.sin(elapsed * 2.2 + leg.phase) * 0.22;
       for (const ripple of pondRipples) {
         const progress = (elapsed * 0.24 + ripple.phase) % 1;
         ripple.mesh.position.set(ripple.x, 0.09, ripple.z);
@@ -939,6 +1144,7 @@ export function createStudyVillaExterior() {
       pondWater.opacity = 0.55 + Math.sin(elapsed * 0.7) * 0.035;
       poolWater.opacity = 0.68 + Math.sin(elapsed * 0.55) * 0.025;
       garage.animate(elapsed);
+      poolPeople.animate(elapsed);
       upper.animate(elapsed);
     },
   };

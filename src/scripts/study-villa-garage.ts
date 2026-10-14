@@ -40,11 +40,8 @@ export function createStudyVillaGarage(): StudyVillaGarage {
     clearcoatRoughness: 0.16,
   });
   const roofGlass = wallGlass.clone();
-  roofGlass.color.setHex(0xb9d3d1);
-  roofGlass.opacity = 0.24;
-  const doorGlass = wallGlass.clone();
-  doorGlass.color.setHex(0xb5c8c8);
-  doorGlass.opacity = 0.27;
+  roofGlass.color.setHex(0xd9d4c5);
+  roofGlass.opacity = 0.2;
   const lightMaterial = standard(0xfff2cf, 0.22, {
     emissive: 0xffd590,
     emissiveIntensity: 1.35,
@@ -162,152 +159,89 @@ export function createStudyVillaGarage(): StudyVillaGarage {
   for (let index = -8; index <= 8; index++)
     box(0.045, 0.018, 0.24, steel, drain, 'garage-drain-grate', index * 0.205, 0.032, 0, 0.005);
 
-  // 玻璃墙分片安装在深色钢构之间，透明但仍保留完整建筑轮廓。
+  // 延续主体楼的奶油色梁柱、大块透明墙面和平屋顶，不再使用密集深色格栅。
   const shell = group(garage, 'garage-building-structure');
   const transparentShell = group(shell, 'villa-garage-transparent-shell');
+  const facade = standard(0xeee7d7, 0.92);
+  const facadeShade = standard(0xd4c9b5, 0.95);
   const halfWidth = 2;
   const halfDepth = 3.02;
-  for (const x of [-halfWidth, halfWidth])
-    for (const z of [-halfDepth, halfDepth]) {
-      box(0.16, 3.05, 0.16, charcoal, shell, 'garage-corner-column', x, 1.66, z, 0.025);
-      box(0.27, 0.13, 0.27, concreteEdge, shell, 'garage-column-foot', x, 0.2, z, 0.025);
-    }
-  for (const z of [-halfDepth, halfDepth])
-    box(4.12, 0.17, 0.17, charcoal, shell, 'garage-top-beam', 0, 3.13, z, 0.025);
-  for (const x of [-halfWidth, halfWidth])
-    box(0.17, 0.17, 6.12, charcoal, shell, 'garage-side-top-beam', x, 3.13, 0, 0.025);
   for (const x of [-halfWidth, halfWidth]) {
-    for (const z of [-2.02, -1.01, 0, 1.01, 2.02])
-      box(0.09, 2.88, 0.09, charcoal, shell, 'garage-side-mullion', x, 1.67, z, 0.012);
-    for (const z of [-2.52, -1.51, -0.505, 0.505, 1.51, 2.52]) {
-      const panel = box(
-        0.055,
-        2.76,
-        0.94,
-        wallGlass,
-        transparentShell,
-        'garage-side-glass-panel',
-        x,
-        1.68,
-        z,
-        0.008,
-      );
-      panel.renderOrder = 3;
+    for (const z of [-halfDepth, halfDepth]) {
+      box(0.22, 2.98, 0.22, facade, shell, 'garage-corner-column', x, 1.65, z);
+      box(0.32, 0.12, 0.32, facadeShade, shell, 'garage-column-foot', x, 0.22, z);
     }
-  }
-  for (const x of [-1.08, 0, 1.08])
-    box(0.085, 2.88, 0.085, charcoal, shell, 'garage-back-mullion', x, 1.67, -halfDepth, 0.012);
-  for (const x of [-1.62, -0.54, 0.54, 1.62]) {
+    box(0.16, 0.42, 6.04, facadeShade, shell, 'garage-side-plinth', x, 0.37, 0);
     const panel = box(
-      1.01,
-      2.76,
       0.055,
+      2.53,
+      5.84,
       wallGlass,
       transparentShell,
-      'garage-back-glass-panel',
+      'garage-side-glass-panel',
       x,
-      1.68,
-      -halfDepth,
+      1.845,
+      0,
       0.008,
     );
     panel.renderOrder = 3;
   }
+  box(4.0, 0.42, 0.16, facadeShade, shell, 'garage-back-plinth', 0, 0.37, -halfDepth);
+  const backPanel = box(
+    3.8,
+    2.53,
+    0.055,
+    wallGlass,
+    transparentShell,
+    'garage-back-glass-panel',
+    0,
+    1.845,
+    -halfDepth,
+    0.008,
+  );
+  backPanel.renderOrder = 3;
 
-  // 正面采用分格式透明车库门，车辆从庭院里也能完整看见。
-  const door = group(shell, 'garage-sectional-glass-door', 0, 0, halfDepth + 0.012);
-  box(4.22, 0.15, 0.16, charcoal, door, 'garage-door-header', 0, 3.13, 0, 0.025);
-  for (const x of [-2.04, -1.02, 0, 1.02, 2.04])
-    box(0.085, 2.84, 0.1, charcoal, door, 'garage-door-vertical-frame', x, 1.68, 0, 0.012);
-  for (const y of [0.28, 0.98, 1.68, 2.38, 3.08])
-    box(4.13, 0.075, 0.1, charcoal, door, 'garage-door-horizontal-frame', 0, y, 0, 0.012);
-  for (let row = 0; row < 4; row++)
-    for (let column = 0; column < 4; column++) {
-      const panel = box(
-        0.94,
-        0.62,
-        0.045,
-        doorGlass,
-        door,
-        `garage-door-glass-${row + 1}-${column + 1}`,
-        -1.53 + column * 1.02,
-        0.63 + row * 0.7,
-        0.006,
-        0.008,
-      );
-      panel.renderOrder = 4;
-    }
-  box(0.5, 0.1, 0.09, steel, door, 'garage-door-handle', 0, 1.03, 0.095, 0.02);
+  const door = group(shell, 'garage-roller-shutter-door', 0, 0, halfDepth + 0.012);
+  for (const x of [-1.96, 1.96])
+    box(0.09, 2.83, 0.1, facade, door, 'garage-door-vertical-frame', x, 1.655, 0);
+  // 半开卷帘：横向金属帘片、两侧导轨和上方卷筒罩，保留观看跑车的开口。
+  const shutterMetal = standard(0xd4c9b5, 0.48, { metalness: 0.35 });
+  for (const x of [-1.9, 1.9])
+    box(0.055, 2.83, 0.12, steel, door, 'garage-shutter-guide', x, 1.655, 0.04);
+  box(4.05, 0.32, 0.35, facade, door, 'garage-shutter-roll-housing', 0, 2.98, 0.025);
+  for (let i = 0; i < 10; i++)
+    box(
+      3.76,
+      0.116,
+      0.065,
+      shutterMetal,
+      door,
+      'garage-shutter-slat',
+      0,
+      1.63 + i * 0.12,
+      0.045,
+      0.012,
+    );
+  box(3.8, 0.09, 0.1, steel, door, 'garage-shutter-bottom-rail', 0, 1.545, 0.045);
+  box(0.4, 0.055, 0.07, darkSteel, door, 'garage-door-handle', 0, 1.55, 0.115, 0.015);
 
-  // 双坡玻璃屋顶延续别墅的透明建筑语言，钢制椽条强化结构细节。
-  const roof = group(shell, 'garage-pitched-glass-roof');
-  const roofPitch = Math.atan2(0.95, 2.08);
-  const roofSlope = Math.hypot(2.08, 0.95) + 0.08;
-  for (const side of [-1, 1]) {
-    const panel = box(
-      roofSlope,
-      0.075,
-      6.42,
-      roofGlass,
-      transparentShell,
-      side < 0 ? 'garage-roof-glass-left' : 'garage-roof-glass-right',
-      side * 1.04,
-      3.61,
-      0,
-      0.018,
-    );
-    panel.rotation.z = side < 0 ? roofPitch : -roofPitch;
-    panel.renderOrder = 4;
-    for (const z of [-2.98, -1.5, 0, 1.5, 2.98]) {
-      const rafter = box(
-        roofSlope,
-        0.075,
-        0.07,
-        charcoal,
-        roof,
-        'garage-roof-rafter',
-        side * 1.04,
-        3.62,
-        z,
-        0.012,
-      );
-      rafter.rotation.z = side < 0 ? roofPitch : -roofPitch;
-    }
-  }
-  box(0.18, 0.18, 6.48, charcoal, roof, 'garage-roof-ridge', 0, 4.09, 0, 0.025);
-  const gableShape = new THREE.Shape();
-  gableShape.moveTo(-1.99, 0);
-  gableShape.lineTo(1.99, 0);
-  gableShape.lineTo(0, 0.92);
-  gableShape.closePath();
-  for (const z of [-3.035, 3.035]) {
-    const gable = mesh(
-      new THREE.ShapeGeometry(gableShape),
-      roofGlass,
-      transparentShell,
-      'garage-glass-gable',
-      0,
-      3.16,
-      z,
-    );
-    if (z < 0) gable.rotation.y = Math.PI;
-    gable.renderOrder = 4;
-    box(4.03, 0.09, 0.09, charcoal, roof, 'garage-gable-base', 0, 3.16, z, 0.012);
-    for (const side of [-1, 1]) {
-      const trim = box(
-        roofSlope,
-        0.075,
-        0.08,
-        charcoal,
-        roof,
-        'garage-gable-roof-trim',
-        side * 1.04,
-        3.62,
-        z,
-        0.012,
-      );
-      trim.rotation.z = side < 0 ? roofPitch : -roofPitch;
-    }
-  }
+  const roof = group(shell, 'garage-flat-roof');
+  const roofPanel = box(
+    4.22,
+    0.14,
+    6.3,
+    roofGlass,
+    transparentShell,
+    'garage-flat-roof-panel',
+    0,
+    3.14,
+    0,
+  );
+  roofPanel.renderOrder = 4;
+  for (const z of [-3.1, 3.1])
+    box(4.36, 0.2, 0.18, facade, roof, 'garage-roof-edge-beam', 0, 3.14, z);
+  for (const x of [-2.1, 2.1])
+    box(0.18, 0.2, 6.3, facade, roof, 'garage-roof-side-beam', x, 3.14, 0);
 
   const lighting = group(garage, 'garage-interior-lighting');
   for (const z of [-1.65, 0, 1.65]) {
@@ -629,6 +563,30 @@ export function createStudyVillaGarage(): StudyVillaGarage {
       2.16,
     );
     lamp.scale.set(0.235, 0.18, 0.055);
+    const bezel = mesh(
+      new THREE.TorusGeometry(1, 0.055, 6, 28),
+      steel,
+      frontDetails,
+      'porsche-headlamp-bezel',
+      x,
+      0.82,
+      2.18,
+    );
+    bezel.scale.set(0.235, 0.18, 0.1);
+    for (const dx of [-0.07, 0.07])
+      for (const dy of [-0.055, 0.055])
+        box(
+          0.045,
+          0.035,
+          0.018,
+          lightMaterial,
+          frontDetails,
+          'porsche-led-projector',
+          x + dx,
+          0.82 + dy,
+          2.214,
+          0.009,
+        );
     const indicator = box(
       0.22,
       0.055,
@@ -676,6 +634,35 @@ export function createStudyVillaGarage(): StudyVillaGarage {
   crest.rotation.x = -Math.PI / 2 + 0.035;
 
   const rearDetails = group(car, 'porsche-rear-details');
+  for (const side of [-1, 1]) {
+    box(
+      0.025,
+      0.042,
+      0.19,
+      steel,
+      body,
+      'porsche-flush-door-handle',
+      side * 0.924,
+      0.77,
+      -0.32,
+      0.009,
+    );
+    box(
+      0.028,
+      0.045,
+      2.34,
+      darkSteel,
+      body,
+      'porsche-lower-sill-trim',
+      side * 0.98,
+      0.27,
+      -0.02,
+      0.009,
+    );
+  }
+  box(1.25, 0.08, 0.12, darkSteel, rearDetails, 'porsche-rear-diffuser', 0, 0.29, -2.04);
+  for (const x of [-0.42, -0.21, 0, 0.21, 0.42])
+    box(0.025, 0.12, 0.19, charcoal, rearDetails, 'porsche-diffuser-fin', x, 0.29, -2.05, 0.008);
   box(
     1.55,
     0.105,

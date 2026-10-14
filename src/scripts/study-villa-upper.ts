@@ -124,8 +124,18 @@ export function createStudyVillaUpper() {
   for (const level of [second, rooftop]) {
     box(13.8, 0.14, 9.5, floorGlass, level, 0, 0, 0, 'villa-transparent-floor-slab');
     for (const z of [-4.76, 4.76]) {
-      box(14.0, 0.2, 0.18, cream, level, 0, 0, z);
-      box(13.8, 0.035, 0.035, gold, level, 0, -0.105, z);
+      // 入口处同步断开边梁，避免露台门洞下方留下绊脚的凸起。
+      const sections =
+        z < 0
+          ? [
+              [-2.03, 9.94],
+              [5.8, 2.4],
+            ]
+          : [[0, 14.0]];
+      for (const [x, width] of sections) {
+        box(width, 0.2, 0.18, cream, level, x, 0, z);
+        box(width, 0.035, 0.035, gold, level, x, -0.105, z);
+      }
     }
     for (const x of [-6.88, 6.88]) box(0.18, 0.2, 9.5, cream, level, x, 0, 0);
   }
@@ -442,29 +452,42 @@ export function createStudyVillaUpper() {
   }
   mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.08, 32), wood, rooftop, -2.1, 0.55, 0.8);
   box(0.09, 0.5, 0.09, bronze, rooftop, -2.1, 0.3, 0.8);
-  // 小型格栅凉架仍保持露天感。
+  // 茶座使用完整不透明顶盖，四周挑檐遮住原来的镂空区域。
   for (const x of [2.4, 5.4])
     for (const z of [-1.4, 1.6]) box(0.09, 2.25, 0.09, wood, rooftop, x, 1.2, z);
-  for (let i = 0; i < 7; i++) box(3.3, 0.07, 0.075, wood, rooftop, 3.9, 2.35, -1.45 + i * 0.52);
+  box(3.5, 0.16, 3.5, cream, rooftop, 3.9, 2.4, 0.1, 'villa-tea-pavilion-solid-roof');
+  for (const z of [-1.65, 1.85]) box(3.5, 0.12, 0.08, wood, rooftop, 3.9, 2.34, z);
+  for (const x of [2.15, 5.65]) box(0.08, 0.12, 3.5, wood, rooftop, x, 2.34, 0.1);
   box(2.2, 0.08, 1.0, wood, rooftop, 3.9, 0.85, 0.1);
   for (const z of [-0.95, 1.12]) box(2.25, 0.14, 0.5, sage, rooftop, 3.9, 0.48, z);
   for (const x of [3.1, 4.7])
     for (const z of [-0.95, 1.12]) box(0.07, 0.4, 0.35, bronze, rooftop, x, 0.24, z);
 
-  // 独立旋转楼梯，每一圈恰好抵达下一层，出口由平台接入后门。
+  // 每层采用 270° 梯段，朝向建筑的 90° 留给入口平台，避免下一梯段挡住出口。
   const stairs = new THREE.Group();
   stairs.name = 'villa-exterior-staircase';
   stairs.position.set(3.75, 0, -6.48);
   group.add(stairs);
   rod(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 7.48, 0), 0.09, bronze, stairs);
   for (let level = 0; level < 2; level++) {
-    const bottom = level === 0 ? 0 : 3.12;
-    const rise = level === 0 ? 3.12 : 3.24;
+    const bottom = level === 0 ? 0.04 : second.position.y + 0.125;
+    const top = level === 0 ? second.position.y + 0.125 : rooftop.position.y + 0.07;
+    const rise = top - bottom;
     const railPoints: THREE.Vector3[] = [];
     for (let i = 0; i <= 20; i++) {
-      const a = Math.PI / 2 + (i / 20) * Math.PI * 2;
+      const a = Math.PI * 0.75 + (i / 20) * Math.PI * 1.5;
       const y = bottom + (i / 20) * rise;
-      const step = box(1.16, 0.08, 0.38, cream, stairs, Math.cos(a) * 0.75, y, Math.sin(a) * 0.75);
+      const step = box(
+        1.16,
+        0.08,
+        0.38,
+        cream,
+        stairs,
+        Math.cos(a) * 0.75,
+        y - 0.04,
+        Math.sin(a) * 0.75,
+        'villa-stair-tread',
+      );
       step.rotation.y = -a;
       const x = Math.cos(a) * 1.27,
         z = Math.sin(a) * 1.27;
@@ -479,21 +502,36 @@ export function createStudyVillaUpper() {
       0,
       0,
     );
-    box(1.55, 0.11, 0.98, cream, stairs, 0, bottom + rise, 1.48, 'villa-stair-landing');
-    for (const x of [-0.73, 0.73])
+    box(1.55, 0.11, 1.52, cream, stairs, 0, top - 0.055, 1.21, 'villa-stair-landing');
+    // 平台两侧设置扶手及立柱，中央通路不再布置螺旋护栏。
+    for (const x of [-0.73, 0.73]) {
       rod(
-        new THREE.Vector3(x, bottom + rise + 0.94, 1.12),
-        new THREE.Vector3(x, bottom + rise + 0.94, 1.96),
+        new THREE.Vector3(x, top + 0.94, 1.12),
+        new THREE.Vector3(x, top + 0.94, 1.96),
         0.03,
         bronze,
         stairs,
       );
+      for (const z of [1.12, 1.96])
+        rod(
+          new THREE.Vector3(x, top, z),
+          new THREE.Vector3(x, top + 0.94, z),
+          0.025,
+          bronze,
+          stairs,
+        );
+    }
+    const lastRail = railPoints[railPoints.length - 1];
+    rod(lastRail, new THREE.Vector3(0.73, top + 0.94, 1.12), 0.03, bronze, stairs);
+    if (level === 1)
+      rod(railPoints[0], new THREE.Vector3(-0.73, bottom + 0.94, 1.12), 0.03, bronze, stairs);
   }
 
   // 五星红旗：3:2 旗面，大星位于左上，四颗小星各有一角朝向大星中心。
   const flagGroup = new THREE.Group();
   flagGroup.name = 'villa-china-flag';
-  flagGroup.position.set(-5.4, 0, 2.4);
+  // 旗座底面贴合顶盖，旗杆位于顶棚平面的正中心。
+  flagGroup.position.set(3.9, 2.39, 0.1);
   rooftop.add(flagGroup);
   box(0.6, 0.18, 0.6, cream, flagGroup, 0, 0.18, 0);
   rod(new THREE.Vector3(0, 0.25, 0), new THREE.Vector3(0, 3.5, 0), 0.04, bronze, flagGroup);
@@ -502,7 +540,7 @@ export function createStudyVillaUpper() {
   flagGeometry.translate(0.93, 2.86, 0);
   const cloth = mesh(
     flagGeometry,
-    mat(0xde2910, 0.8, { side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ color: 0xde2910, side: THREE.DoubleSide }),
     flagGroup,
     0,
     0,
@@ -559,6 +597,11 @@ export function createStudyVillaUpper() {
       mesh: reverse,
       original: new Float32Array(geometry.attributes.position.array),
     });
+  }
+  // 旗面使用无光照材质，同时关闭投射与接收阴影，保留几何飘动。
+  for (const part of flagParts) {
+    part.mesh.castShadow = false;
+    part.mesh.receiveShadow = false;
   }
   function animate(time: number) {
     for (const part of flagParts) {
